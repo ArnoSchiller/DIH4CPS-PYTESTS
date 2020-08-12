@@ -155,10 +155,18 @@ class WebcamRecorder:
     def captureFrames(self):
         self.isRecording = True
         self.isCompleted = False
+        counter_frames = 0
         while(self.capture.isOpened() and not self.isCompleted):
             ret, frame = self.capture.read()
             if ret == True:
                 self.frames_queue.put(frame)
+                counter_frames += 1
+                # recording completed
+                if counter_frames > self.videolength_frames:
+                    self.isCompleted = True
+                    logging.info("Recording completed.")
+                    self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["RecordedFile"],file=self.file_name)
+                    break
             else:
                 if not self.capture.isOpened():
                     self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["RecordLostConnection"],file=self.file_name)
@@ -169,17 +177,13 @@ class WebcamRecorder:
         self.isRecording = False
 
     def saveFrames(self):
-        counter_frames = 0
+        counter_frames = 0 
         while self.isRecording or len(self.frames_queue) > 0:
             frame = self.frames_queue.get()
             self.writer.write(frame)
             counter_frames += 1
-                # recording completed
-            if counter_frames >= self.videolength_frames:
-                self.isCompleted = True
-                logging.info("Recording completed.")
-                self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["RecordedFile"],file=self.file_name)
-                break
+        print(counter_frames)
+            
 
     def setVideoLength(self, newLength_s):
         """
@@ -232,7 +236,9 @@ class WebcamRecorder:
     def release(self):
         """
         Release everything and close open windows.
-        """            
+        """       
+        self.isRecording = False
+        self.isCompleted = True    
         self.capture.release()
         self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["ClosedCamera"])
         self.writer.release()

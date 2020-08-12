@@ -71,7 +71,7 @@ class WebcamRecorder:
         """
         # setup argument parser
         parser = argparse.ArgumentParser()
-        parser.add_argument("--videoLength", type=int, help="set specific video length, default = 10s.")
+        parser.add_argument("--videoLength", type=int, help="set specific video length, default = 5s.")
         args = parser.parse_args()
         if args.videoLength > 0 and args.videoLength < 300:
             self.setVideoLength(args.videoLength)
@@ -189,7 +189,7 @@ class WebcamRecorder:
                 if not self.capture.isOpened():
                     self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["RecordLostConnection"],file=self.file_name)
                     logging.error("Lost connection to camera.")
-                self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["RecordFileError"],file=self.file_name)
+                self.mqtt.sendProcessMessage(self.user_name, self.mqtt.error_list[self.module_name]["RecordFileError"],file=self.file_name)
                 logging.error("Can not read from VideoCapture.")
                 break
 

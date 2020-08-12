@@ -125,7 +125,9 @@ def updateCrontabInSystem(cronFile_path):
 
 if __name__ == '__main__':
     handler = CronHandler()
-
+    videoLen = 10
+    if videoLen > 0 and videoLen < 300:
+        handler.webcamRecorder_command += " --videoLength {}".format(videoLen)
     # run WebCamRecorder every 10 minutes
     handler.addCron(handler.cron_choices["every_10min"], 
                     handler.webcamRecorder_command, 

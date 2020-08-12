@@ -28,6 +28,7 @@ import cv2
 import os, datetime
 import logging, time
 import argparse
+import threading, queue
 from mqtt_connection import MQTTConnection
 from configuration import * 
 
@@ -73,9 +74,10 @@ class WebcamRecorder:
         parser = argparse.ArgumentParser()
         parser.add_argument("--videoLength", type=int, help="set specific video length, default = 5s.")
         args = parser.parse_args()
-        if args.videoLength > 0 and args.videoLength < 300:
-            self.setVideoLength(args.videoLength)
-        print(args.videoLength)
+        if args.videoLength:
+            if args.videoLength > 0 and args.videoLength < 300:
+                self.setVideoLength(args.videoLength)
+            print(args.videoLength)
 
         # logging via MQTT
         self.mqtt = MQTTConnection()
@@ -121,6 +123,12 @@ class WebcamRecorder:
 
         logging.info("Connected to camera.")
         self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["OpenedCamera"])
+
+        # initialize video capture thread
+        self.capture_thread = threading.Thread(target=self.captureFrames)
+        self.capture_thread.start()
+        self.frames_queue = queue.Queue()
+ 
         # initialize video writer
         self.frame_width = int(self.capture.get(3))
         self.frame_height = int(self.capture.get(4))
@@ -144,6 +152,34 @@ class WebcamRecorder:
         logging.info("VideoWriter is open.")
         self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["OpenedWriter"])
 
+    def captureFrames(self):
+        self.isRecording = True
+        self.isCompleted = False
+        while(self.capture.isOpened() and not self.isCompleted):
+            ret, frame = self.capture.read()
+            if ret == True:
+                self.frames_queue.put(frame)
+            else:
+                if not self.capture.isOpened():
+                    self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["RecordLostConnection"],file=self.file_name)
+                    logging.error("Lost connection to camera.")
+                self.mqtt.sendProcessMessage(self.user_name, self.mqtt.error_list[self.module_name]["RecordFileError"],file=self.file_name)
+                logging.error("Can not read from VideoCapture.")
+                break
+        self.isRecording = False
+
+    def saveFrames(self):
+        counter_frames = 0
+        while self.isRecording or len(self.frames_queue) > 0:
+            frame = self.frames_queue.get()
+            self.writer.write(frame)
+            counter_frames += 1
+                # recording completed
+            if counter_frames >= self.videolength_frames:
+                self.isCompleted = True
+                logging.info("Recording completed.")
+                self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["RecordedFile"],file=self.file_name)
+                break
 
     def setVideoLength(self, newLength_s):
         """
@@ -205,7 +241,8 @@ class WebcamRecorder:
 
 def doRecord():
     recorder = WebcamRecorder()
-    recorder.record()
+    recorder.saveFrames()
+    # recorder.record()
     recorder.release()
 
 if __name__ == "__main__":

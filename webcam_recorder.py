@@ -123,11 +123,6 @@ class WebcamRecorder:
 
         logging.info("Connected to camera.")
         self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["OpenedCamera"])
-
-        # initialize video capture thread
-        self.capture_thread = threading.Thread(target=self.captureFrames)
-        self.capture_thread.start()
-        self.frames_queue = queue.Queue()
  
         # initialize video writer
         self.frame_width = int(self.capture.get(3))
@@ -177,8 +172,13 @@ class WebcamRecorder:
         self.isRecording = False
 
     def saveFrames(self):
+        # initialize video capture thread
+        self.capture_thread = threading.Thread(target=self.captureFrames)
+        self.capture_thread.start()
+        self.frames_queue = queue.Queue()
+
         counter_frames = 0 
-        while self.isRecording or len(self.frames_queue) > 0:
+        while self.isRecording or self.frames_queue.qsize() > 0:
             frame = self.frames_queue.get()
             self.writer.write(frame)
             counter_frames += 1

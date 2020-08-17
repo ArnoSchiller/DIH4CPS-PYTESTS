@@ -3,8 +3,8 @@
 \
     *Step 1: setup virtual environment*\
     \
-&nbsp;      - Linux: (need to be tested)\
-            python -m venv .linux_venv\
+&nbsp;&nbsp;      - Linux: (need to be tested)\
+&nbsp;&nbsp;&nbsp;&nbsp;            python -m venv .linux_venv\
             source .linux_venv/bin/activate\
             pip install -r requirements.txt\
         - Windows (Visual Studio Code):\

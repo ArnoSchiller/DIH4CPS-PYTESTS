@@ -5,8 +5,8 @@
     \
         - Linux: (need to be tested)\
             python -m venv .linux_venv\
-            source .linux_venv/bin/activate\ 
-            pip install -r requirements.txt\  
+            source .linux_venv/bin/activate\
+            pip install -r requirements.txt\
         - Windows (Visual Studio Code):\
             Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process \
             py -3 -m venv .venv \

@@ -10,14 +10,14 @@
         - Windows (Visual Studio Code):\
             Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process \
             py -3 -m venv .venv \
-            .\.venv\Scripts\activate \ 
-            pip install -r requirements.txt \ 
-      \
+            .\.venv\Scripts\activate \
+            pip install -r requirements.txt\
+            \
     *Step 2: setup crontabs to run the program* \
     \
-        - Linux: \ 
+        - Linux: \
             python3 cron_handler.py \
-            --> make sure cron_handler is using the python path of the created venv \
+            --> make sure cron_handler is using the python path of the created venv\
         - Windows: \
             setup cronjobs manually (Task Scheduler)\
-            --> make sure cron_handler is using the python path of the created venv \ 
+            --> make sure cron_handler is using the python path of the created venv\

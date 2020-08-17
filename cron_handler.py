@@ -50,9 +50,12 @@ class CronHandler:
         """ Set used paths, commands and output file paths.
         """
 
-        self.python_path = sys.executable
         self.parentDir_path = os.path.dirname(os.path.realpath(__file__))
         self.outputFile_path = os.path.join(self.parentDir_path, self.outputFile_name)
+        
+        # self.python_path = sys.executable                                                 # find from system
+        # self.python_path = os.path.join(self.parentDir_path, ".venv/Scripts/python.exe")  # for windows venv
+        self.python_path = os.path.join(self.parentDir_path, ".linux_venv/bin/python3")     # for linux venv
 
         self.webcamRecorder_path = os.path.join(self.parentDir_path, "webcam_recorder.py")
         self.cloudConnection_path = os.path.join(self.parentDir_path, "cloud_connection.py")

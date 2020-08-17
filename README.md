@@ -8,7 +8,7 @@
             source .linux_venv/bin/activate\
             pip install -r requirements.txt\
         - Windows (Visual Studio Code):\
-            Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process \
+            Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process\
             py -3 -m venv .venv \
             .\.venv\Scripts\activate \
             pip install -r requirements.txt\

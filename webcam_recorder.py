@@ -247,8 +247,8 @@ class WebcamRecorder:
 
 def doRecord():
     recorder = WebcamRecorder()
-    recorder.saveFrames()
-    # recorder.record()
+    #recorder.saveFrames()
+    recorder.record()
     recorder.release()
 
 if __name__ == "__main__":

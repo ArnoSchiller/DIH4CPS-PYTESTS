@@ -1,6 +1,6 @@
 **Projekt DIH4CPS**
 
-***Getting Started:***
+***Getting Started:***\n
     *Step 1: setup virtual environment*
         - Linux: (need to be tested)
             python -m venv .linux_venv

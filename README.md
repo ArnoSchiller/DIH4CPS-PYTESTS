@@ -3,7 +3,7 @@
 \
     *Step 1: setup virtual environment*\
     \
-        - Linux: (need to be tested)\
+&nbsp;      - Linux: (need to be tested)\
             python -m venv .linux_venv\
             source .linux_venv/bin/activate\
             pip install -r requirements.txt\
@@ -20,4 +20,4 @@
             --> make sure cron_handler is using the python path of the created venv\
         - Windows: \
             setup cronjobs manually (Task Scheduler)\
-            --> make sure cron_handler is using the python path of the created venv\
+            --> make sure cron_handler is using the python path of the created venv

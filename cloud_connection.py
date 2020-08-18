@@ -7,7 +7,7 @@ also see https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-upload
 
 @authors:   Arno Schiller (AS)
 @email:     schiller@swms.de
-@version:   v0.0.3
+@version:   v0.0.5
 @license:   ...
 
 VERSION HISTORY
@@ -20,6 +20,8 @@ v0.0.2      (AS) Added functionality to upload every file created on the    05.0
                 for yesterday.                                                        \n
 v0.0.3      (AS) Added logging.                                             06.08.2020\n
 v0.0.4      (AS) Included MQTT.                                             10.08.2020\n
+v0.0.5      (AS) Added functionality to remove uploaded file from           18.08.2020\n
+                internal file system to free some storage.                            \n
 
 ToDo:   - Add return value to the functions (bool)
 """
@@ -129,8 +131,20 @@ class CloudConnection:
         file_path = os.path.join(self.recordsDir_path, file_name)
         try:
             self.s3_client.upload_file(file_path, self.bucket_name,object_name, Callback=ProgressPercentage(file_path))
-            self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["UploadedFile"], file=object_name)
-            # logging.info("Uploading file {0} done".format(object_name))
+
+            # Prove if the upload was successfully
+            content = self.s3_client.head_object(Bucket=self.bucket_name,Key=object_name)
+            if content.get('ResponseMetadata',None) is not None:
+                logging.info("File exists - s3://%s/%s " %(self.bucket_name,object_name))
+                self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["UploadedFile"], file=object_name)
+                # if upload was successful, delete the file 
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+
+            else:
+                logging.info("File does not exist - s3://%s/%s " %(self.bucket_name,object_name))
+                self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["UploadError"], file=object_name)
+
             return True
         except FileNotFoundError:
             self.mqtt.sendProcessMessage(self.user_name, self.mqtt.error_list[self.module_name]["FileNotFound"], file=object_name)
@@ -142,6 +156,10 @@ class CloudConnection:
             return False
         except ClientError:
             self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["ClientError"], file=object_name)
+            #logging.error("Client Error")
+            return False
+        except Exception:
+            self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["UploadError"], file=object_name)
             #logging.error("Client Error")
             return False
 

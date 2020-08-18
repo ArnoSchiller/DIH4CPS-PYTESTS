@@ -93,6 +93,7 @@ class CloudConnection:
                 endpoint_url=self.cloud_url, 
                 config=boto3.session.Config(signature_version='s3v4'))
             counter_tries += 1
+            time.sleep(5)
         self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["ConnectedToServer"])
         # logging.info("Connected to S3 server.")
 
@@ -102,8 +103,7 @@ class CloudConnection:
 
     def setBucketName(self, bucket_name):
         # Retrieve the list of existing buckets
-        s3 = boto3.client('s3')
-        response = s3.list_buckets()
+        response = self.s3_client.list_buckets()
 
         for bucket in response['Buckets']:
             if bucket['Name'] == bucket_name:
@@ -137,6 +137,7 @@ class CloudConnection:
             if content.get('ResponseMetadata',None) is not None:
                 logging.info("File exists - s3://%s/%s " %(self.bucket_name,object_name))
                 self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["UploadedFile"], file=object_name)
+                self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["UploadReady"], file=object_name)
                 # if upload was successful, delete the file 
                 if os.path.exists(file_path):
                     os.remove(file_path)

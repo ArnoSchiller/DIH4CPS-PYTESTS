@@ -81,6 +81,7 @@ class MQTTConnection:
 
         "CloudConnection" : {
             # Upload files 
+            "UploadReady" : "modul=CloudConnection,process=UploadFile status=0",
             "UploadingFile" : "modul=CloudConnection,process=UploadFile status=1",
             "UploadedFile"  : "modul=CloudConnection,process=UploadFile status=2",
 

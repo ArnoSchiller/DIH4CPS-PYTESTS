@@ -22,6 +22,8 @@ v0.0.3      (AS) Added logging.                                             06.0
 v0.0.4      (AS) Included MQTT.                                             10.08.2020\n
 v0.0.5      (AS) Added functionality to remove uploaded file from           18.08.2020\n
                 internal file system to free some storage.                            \n
+v0.0.6      (AS) Included argparse to change the recording date to          18.08.2020\n
+                upload files recorded today.                                          \n
 
 ToDo:   - Add return value to the functions (bool)
 """
@@ -31,6 +33,7 @@ import os, glob
 import datetime, time
 from datetime import timedelta
 import logging
+import argparse 
 from mqtt_connection import MQTTConnection
 from configuration import * 
 
@@ -69,6 +72,7 @@ class CloudConnection:
         """
         Setup the S3 connection and the used bucket. Also define the recordings directory.
         """
+
         # logging via MQTT
         self.mqtt = MQTTConnection()
 
@@ -137,6 +141,7 @@ class CloudConnection:
             if content.get('ResponseMetadata',None) is not None:
                 logging.info("File exists - s3://%s/%s " %(self.bucket_name,object_name))
                 self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["UploadedFile"], file=object_name)
+                time.sleep(1)
                 self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["UploadReady"], file=object_name)
                 # if upload was successful, delete the file 
                 if os.path.exists(file_path):
@@ -188,8 +193,6 @@ class CloudConnection:
             file_name = os.path.basename(path)
             self.uploadFileToCloud(file_name)
 
-        self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["ConnectedToServer"])
-        time.sleep(1)
         self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["DisconnectedServer"])
         logging.info("Upload files from {0} done.".format(day_datetime))
 
@@ -218,11 +221,25 @@ class ProgressPercentage(object):
             sys.stdout.flush()
     
          
-def sendFilesFromYesterday():
+def uploadFilesFromToday():
+    s3Con = CloudConnection()
+    today = datetime.datetime.now() 
+    s3Con.uploadFilesFromDay("test1", today)
+
+def uploadFilesFromYesterday():
     s3Con = CloudConnection()
     yesterday = datetime.datetime.now() - timedelta(days = 1)
     s3Con.uploadFilesFromDay("test1", yesterday)
 
 if __name__ == "__main__":
-    sendFilesFromYesterday()
+
+    # setup argument parser 
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-t", "--today", help="upload files recorded today, default is yesterday.",
+			action="store_true")
+    args = parser.parse_args()
+    if args.today:
+        uploadFilesFromToday()
+    else:
+        uploadFilesFromYesterday()
 

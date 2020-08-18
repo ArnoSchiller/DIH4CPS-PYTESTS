@@ -15,6 +15,7 @@ v0.0.1      (AS) First initialize. Added functions to add and update        06.0
                 crontabs. It saves crontabs to a txt file and this crontab            \n
                 file will be added to the sytem.                                      \n
 v0.0.2      (AS) Updated CronHandler and tested on Linux. Works fine.       07.08.2020\n
+v0.0.2      (AS) Included system monitoring.                                13.08.2020\n
     
 Attributes:
 -----------
@@ -137,11 +138,19 @@ if __name__ == '__main__':
     handler.addCron(handler.cron_choices["every_10min"], 
                     handler.webcamRecorder_command, 
                     handler.webcamRecorder_output)
+	
+    # run cloundConnection every 2 hours
+    handler.cloudConnection_command += " --today"
+    handler.addCron(handler.cron_choices["every_2hour_00"], 
+                    handler.cloudConnection_command, 
+                    handler.cloudConnection_output)
 
+    """
     # run cloundConnection every day at 00:05 AM
     handler.addCron(handler.cron_choices["every_day_00_05"], 
                     handler.cloudConnection_command, 
                     handler.cloudConnection_output)
+    """
 
     # run system_monitoring every 2 minutes
     handler.addCron(handler.cron_choices["every_2min"], 

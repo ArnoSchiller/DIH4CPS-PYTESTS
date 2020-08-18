@@ -59,7 +59,7 @@ class WebcamRecorder:
     """
     recording_name = global_user_name
     fps = 20
-    videolength_s = 10
+    videolength_s = 15
     videolength_frames = fps * videolength_s
     max_tries = 5
     connection_str = global_camera_connection
@@ -247,8 +247,8 @@ class WebcamRecorder:
 
 def doRecord():
     recorder = WebcamRecorder()
-    #recorder.saveFrames()
-    recorder.record()
+    recorder.saveFrames()
+    #recorder.record()
     recorder.release()
 
 if __name__ == "__main__":

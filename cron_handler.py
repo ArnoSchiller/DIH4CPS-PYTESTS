@@ -53,18 +53,20 @@ class CronHandler:
         self.parentDir_path = os.path.dirname(os.path.realpath(__file__))
         self.outputFile_path = os.path.join(self.parentDir_path, self.outputFile_name)
         
-        # self.python_path = sys.executable                                                 # find from system
+        self.python_path = sys.executable                                                 # find from system
         # self.python_path = os.path.join(self.parentDir_path, ".venv/Scripts/python.exe")  # for windows venv
-        self.python_path = os.path.join(self.parentDir_path, ".linux_venv/bin/python3")     # for linux venv
+        # self.python_path = os.path.join(self.parentDir_path, ".linux_venv/bin/python3")     # for linux venv
 
         self.webcamRecorder_path = os.path.join(self.parentDir_path, "webcam_recorder.py")
         self.cloudConnection_path = os.path.join(self.parentDir_path, "cloud_connection.py")
+        self.systemMonitoring_path = os.path.join(self.parentDir_path, "system_monitoring.py")
 
         self.webcamRecorder_command = "{0} {1}".format(self.python_path, self.webcamRecorder_path)
         self.cloudConnection_command = "{0} {1}".format(self.python_path, self.cloudConnection_path)
+        self.systemMonitoring_command = "{0} {1}".format(self.python_path, self.systemMonitoring_path)
 
-        self.webcamRecorder_output = os.path.join(self.parentDir_path, "webcam_recorder.py")
-        self.cloudConnection_output = os.path.join(self.parentDir_path, "cloud_connection.py")
+        self.webcamRecorder_output = os.path.join(self.parentDir_path, "log_webcam_recorder.txt")
+        self.cloudConnection_output = os.path.join(self.parentDir_path, "log_cloud_connection.txt")
 
     def addCron(self, cron_str, command_str, outputFile_path=None):
         """ Add new crontab to cronList
@@ -81,7 +83,7 @@ class CronHandler:
         """
         cron = cron_str + " " + command_str
         if not outputFile_path == None:
-            cron += " " + outputFile_path 
+            cron += " > " + outputFile_path 
         self.cronList.append(cron)
 
     def updateCron(self, index, cron_str, command_str, outputFile_path=None):
@@ -140,6 +142,10 @@ if __name__ == '__main__':
     handler.addCron(handler.cron_choices["every_day_00_05"], 
                     handler.cloudConnection_command, 
                     handler.cloudConnection_output)
+
+    # run system_monitoring every 2 minutes
+    handler.addCron(handler.cron_choices["every_2min"], 
+                    handler.systemMonitoring_command)
     
     handler.writeCronToFile()
 

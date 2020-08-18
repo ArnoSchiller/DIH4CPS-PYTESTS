@@ -102,12 +102,12 @@ class MQTTConnection:
     error_list = {
         "WebcamRecorder" : {
             # Open camera
-            "OpenCameraError"   : "modul=CloudConnection,process=OpenCamera status=10",
+            "OpenCameraError"           : "modul=WebcamRecorder,process=OpenCamera status=10",
             # Open writer
-            "OpenWriterError"   : "modul=CloudConnection,process=OpenWriter status=10",
+            "OpenWriterError"           : "modul=WebcamRecorder,process=OpenWriter status=10",
             # Record file 
-            "RecordLostConnection"      : "modul=CloudConnection,process=RecordFile status=9",
-            "RecordFileError"           : "modul=CloudConnection,process=RecordFile status=10"
+            "RecordLostConnection"      : "modul=WebcamRecorder,process=RecordFile status=9",
+            "RecordFileError"           : "modul=WebcamRecorder,process=RecordFile status=10"
         },
 
         "CloudConnection" : {

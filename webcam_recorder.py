@@ -8,7 +8,7 @@ Requirements:
 
 @authors:   Arno Schiller (AS)
 @email:     schiller@swms.de
-@version:   v0.0.7
+@version:   v0.0.8
 @license:   ...
 
 VERSION HISTORY
@@ -22,6 +22,7 @@ v0.0.4      (AS) Outsourced crontab to system (see README.txt)              05.0
 v0.0.5      (AS) Added logging.                                             06.08.2020\n
 v0.0.6      (AS) Included MQTT API.                                         10.08.2020\n
 v0.0.7      (AS) Included args handler to change video length.              12.08.2020\n
+v0.0.8      (AS) Included LED ring.                                         19.08.2020\n
 """
 
 import cv2
@@ -30,7 +31,9 @@ import logging, time
 import argparse
 import threading, queue
 from mqtt_connection import MQTTConnection
+from LED_control import LEDRing
 from configuration import * 
+
 
 class WebcamRecorder:
     """ 
@@ -56,6 +59,9 @@ class WebcamRecorder:
         representative name for clear attribution of MQTT messages
     module_name : str 
         name of this class
+
+    use_light : bool 
+        true if the LED ring should be used while recording
     """
     recording_name = global_user_name
     fps = 20
@@ -67,9 +73,12 @@ class WebcamRecorder:
     user_name = global_user_name
     module_name = "WebcamRecorder"
 
+    use_light = global_use_light
+
     def __init__(self):
         """ Setup video capture and video writer. 
         """
+
         # setup argument parser
         parser = argparse.ArgumentParser()
         parser.add_argument("--videoLength", type=int, help="set specific video length, default = 5s.")
@@ -78,6 +87,10 @@ class WebcamRecorder:
             if args.videoLength > 0 and args.videoLength < 300:
                 self.setVideoLength(args.videoLength)
             print(args.videoLength)
+
+        # setup LED interface if used 
+        if self.use_light:
+            self.led = LEDRing()
 
         # logging via MQTT
         self.mqtt = MQTTConnection()
@@ -148,6 +161,8 @@ class WebcamRecorder:
         self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["OpenedWriter"])
 
     def captureFrames(self):
+        if self.use_light:
+            self.led.activate()
         self.isRecording = True
         self.isCompleted = False
         counter_frames = 0
@@ -170,6 +185,8 @@ class WebcamRecorder:
                 logging.error("Can not read from VideoCapture.")
                 break
         self.isRecording = False
+        if self.use_light:
+            self.led.deactivate()
 
     def saveFrames(self):
         # initialize video capture thread
@@ -201,6 +218,8 @@ class WebcamRecorder:
         """
         Records video and saves it to output file. 
         """
+        if self.use_light:
+            self.led.activate()
         logging.info("Started recording.")
         self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["RecordingFile"],file=self.file_name)
         counter_frames = 0
@@ -232,11 +251,15 @@ class WebcamRecorder:
                 self.mqtt.sendProcessMessage(self.user_name, self.mqtt.error_list[self.module_name]["RecordFileError"],file=self.file_name)
                 logging.error("Can not read from VideoCapture.")
                 break
+        if self.use_light:
+            self.led.deactivate()
 
     def release(self):
         """
         Release everything and close open windows.
         """       
+        if self.use_light:
+            self.led.release()
         self.isRecording = False
         self.isCompleted = True    
         self.capture.release()

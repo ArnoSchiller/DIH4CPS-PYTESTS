@@ -16,6 +16,7 @@ global_user_name = "test1"
 # Recorder 
 global_recordsDir_name      = "Recordings"
 global_camera_connection    = "rtsp://admin:admin@192.168.8.22:8554"
+global_use_light            = True
 
 # Cloud 
 global_cloud_access_key     = "minio"

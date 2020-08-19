@@ -65,7 +65,7 @@ class WebcamRecorder:
     """
     recording_name = global_user_name
     fps = 20
-    videolength_s = 15
+    videolength_s = 5
     videolength_frames = fps * videolength_s
     max_tries = 5
     connection_str = global_camera_connection
@@ -172,7 +172,7 @@ class WebcamRecorder:
                 self.frames_queue.put(frame)
                 counter_frames += 1
                 # recording completed
-                if counter_frames > self.videolength_frames:
+                if counter_frames >= self.videolength_frames:
                     self.isCompleted = True
                     logging.info("Recording completed.")
                     self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["RecordedFile"],file=self.file_name)
@@ -193,6 +193,7 @@ class WebcamRecorder:
         self.capture_thread = threading.Thread(target=self.captureFrames)
         self.capture_thread.start()
         self.frames_queue = queue.Queue()
+        self.isRecording = True
 
         counter_frames = 0 
         while self.isRecording or self.frames_queue.qsize() > 0:

@@ -3,6 +3,8 @@ LEDRing: This class controls the LED ring connected via arduino nano.
             Running this script will start a loop which activates and 
             deactivates the LED every few secounds.  
 
+Connect GND to GND (Arduino) and Pin 11 to A0 (Arduino).
+
 Requirements:
 - RPi.GPIO: pip install Jetson.GPIO
 

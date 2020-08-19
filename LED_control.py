@@ -23,7 +23,8 @@ import time
 
 class LEDRing:
     # Pin Definitions
-    ledring_pin = 18  # BOARD pin 12, BCM pin 18
+    # ledring_pin = 18  # BOARD pin 12, BCM pin 18
+    ledring_pin = 17  # BOARD pin 11, BCM pin 17
     
     def __init__(self):
         # Pin Setup:
@@ -39,8 +40,9 @@ class LEDRing:
     def deactivate(self):
         GPIO.output(self.ledring_pin, GPIO.LOW)
 
+    def release(self):
+        GPIO.cleanup()
 
-    # vllt für den destruktor: GPIO.cleanup()
 
 def testLoop():
     led = LEDRing()
@@ -53,6 +55,7 @@ def testLoop():
         led.deactivate()
         time.sleep(sleep_time)
         counter += 1
+    led.release()
 
 if __name__ == '__main__':
     testLoop()

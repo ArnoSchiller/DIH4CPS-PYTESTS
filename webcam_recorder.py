@@ -93,7 +93,7 @@ class WebcamRecorder:
             self.led = LEDRing()
 
         # logging via MQTT
-        self.mqtt = MQTTConnection()
+        #self.mqtt = MQTTConnection()
         
         # logging via output / file
         #logging.basicConfig(level=logging.INFO)
@@ -119,23 +119,23 @@ class WebcamRecorder:
 
         # initialize video capture
         self.capture = cv2.VideoCapture(self.connection_str)
-        self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["OpeningCamera"])
+        #self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["OpeningCamera"])
 
         counter_tries = 1
         while not self.capture.isOpened():
             if counter_tries > self.max_tries:
-                self.mqtt.sendProcessMessage(self.user_name, self.mqtt.error_list[self.module_name]["OpenCameraError"])
+                #self.mqtt.sendProcessMessage(self.user_name, self.mqtt.error_list[self.module_name]["OpenCameraError"])
                 logging.error("Can not connect to camera ({0} tries). Quitting...".format(counter_tries))
                 exit()
 
             logging.warning("Can not connect to camera. Retrying...")
             time.sleep(2)
             self.capture = cv2.VideoCapture(self.connection_str)
-            self.mqtt.sendProcessMessage(self.user_name, self.mqtt.warning_list[self.module_name]["OpeningCameraFailed"])
+            #self.mqtt.sendProcessMessage(self.user_name, self.mqtt.warning_list[self.module_name]["OpeningCameraFailed"])
             counter_tries += 1
 
         logging.info("Connected to camera.")
-        self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["OpenedCamera"])
+        #self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["OpenedCamera"])
  
         # initialize video writer
         self.frame_width = int(self.capture.get(3))
@@ -143,22 +143,22 @@ class WebcamRecorder:
     
         fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
         self.writer = cv2.VideoWriter(file_path, fourcc, self.fps, (self.frame_width, self.frame_height))
-        self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["OpeningWriter"])
+        #self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["OpeningWriter"])
         
         counter_tries = 1
         while not self.writer.isOpened():
             if counter_tries > self.max_tries:
                 logging.error("Can not open file writer ({0} tries). Quitting...".format(counter_tries))
-                self.mqtt.sendProcessMessage(self.user_name, self.mqtt.error_list[self.module_name]["OpenFileWriterError"])
+                #self.mqtt.sendProcessMessage(self.user_name, self.mqtt.error_list[self.module_name]["OpenFileWriterError"])
                 exit()
 
             logging.warning("Can not open file writer. Retrying...")
-            self.mqtt.sendProcessMessage(self.user_name, self.mqtt.warning_list[self.module_name]["OpenFileWriterFailed"])
+            #self.mqtt.sendProcessMessage(self.user_name, self.mqtt.warning_list[self.module_name]["OpenFileWriterFailed"])
             time.sleep(5)
             self.writer = cv2.VideoWriter(file_path, fourcc, self.fps, (self.frame_width, self.frame_height))
             counter_tries += 1
         logging.info("VideoWriter is open.")
-        self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["OpenedWriter"])
+        #self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["OpenedWriter"])
 
     def captureFrames(self):
         if self.use_light:
@@ -175,13 +175,13 @@ class WebcamRecorder:
                 if counter_frames >= self.videolength_frames:
                     self.isCompleted = True
                     logging.info("Recording completed.")
-                    self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["RecordedFile"],file=self.file_name)
+                    #self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["RecordedFile"],file=self.file_name)
                     break
             else:
                 if not self.capture.isOpened():
-                    self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["RecordLostConnection"],file=self.file_name)
+                    #self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["RecordLostConnection"],file=self.file_name)
                     logging.error("Lost connection to camera.")
-                self.mqtt.sendProcessMessage(self.user_name, self.mqtt.error_list[self.module_name]["RecordFileError"],file=self.file_name)
+                #self.mqtt.sendProcessMessage(self.user_name, self.mqtt.error_list[self.module_name]["RecordFileError"],file=self.file_name)
                 logging.error("Can not read from VideoCapture.")
                 break
         self.isRecording = False
@@ -264,9 +264,9 @@ class WebcamRecorder:
         self.isRecording = False
         self.isCompleted = True    
         self.capture.release()
-        self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["ClosedCamera"])
+        #self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["ClosedCamera"])
         self.writer.release()
-        self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["ClosedWriter"])
+        #self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["ClosedWriter"])
         cv2.destroyAllWindows()
 
 def doRecord():

@@ -196,6 +196,27 @@ class CloudConnection:
         self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["DisconnectedServer"])
         logging.info("Upload files from {0} done.".format(day_datetime))
 
+    def uploadEveryAviFile(self, recording_name):
+        """ Upload every avi file in the Recordings directory.
+
+        Parameters
+        ----------
+        recording_name : str
+            representative name for clear attribution of the recording (see WebcamRecorder)
+        """
+        logging.info("Upload every avi file ...")
+        # create the filter string
+        filter_str = "*.avi"
+        filter_path = os.path.join(self.recordsDir_path, filter_str)
+        file_paths = glob.glob(filter_path)
+
+        for path in file_paths:
+            file_name = os.path.basename(path)
+            self.uploadFileToCloud(file_name)
+
+        self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["DisconnectedServer"])
+        logging.info("Upload avi files done.")
+
 import sys
 import threading
 class ProgressPercentage(object):

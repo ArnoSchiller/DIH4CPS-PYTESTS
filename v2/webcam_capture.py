@@ -18,8 +18,11 @@ v0.x.x           see v1 (webcam_recorder) for more informations.            01-0
 v1.0.0      (AS) First initialize. Added code from WebcamRecorder. This     01-09-2020\n
                 version does only saves video frames to ring buffer.                  \n
 """
-
-from cv2 import cv2
+import platform
+if platform.system() == 'Windows':
+    from cv2 import cv2
+else:
+    import cv2
 import threading
 from configuration import * 
 

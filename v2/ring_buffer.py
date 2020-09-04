@@ -134,8 +134,8 @@ class RingBuffer:
             self.head_pos = head_next
             head_difference = 0 
 
-        print("Head val: ", self.get_element(self.head_pos)[0][0])
-        print("Jumps = ", head_difference)
+        #print("Head val: ", self.get_element(self.head_pos)[0][0])
+        #print("Jumps = ", head_difference)
         return head_difference, self.get_element(self.head_pos)
 
     def get_distance_pointers(self, first_pointer, second_pointer):

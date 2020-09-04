@@ -45,7 +45,7 @@ class WebcamRecorder:
     recording_name : str
         representative name for clear attribution of the recording
     fps : int
-        frames per second. 
+        frames per second
     videolength_s : int
         length of the video to record in seconds 
     videolength_frames : int

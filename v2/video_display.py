@@ -18,6 +18,7 @@ v1.0.0      (AS) First initialize. Added code from webcam_display and       01-0
                 included buffer.
 """
 
+import platform
 if platform.system() == 'Windows':
     from cv2 import cv2
 else:

@@ -12,7 +12,7 @@ v1.0.0      (AS) First initialize.                                          02-0
 """
 
 import threading
-from video_record import VideoRecorder
+from VideoHandling.video_record import VideoRecorder
 
 class VideoProcessor:
     """ 
@@ -35,7 +35,7 @@ class VideoProcessor:
         while self.isRunning:
             counter += 1
             frame = self.ring_buffer.get_next_element()
-
+            """
             if counter >= 40 and counter < 80:
                 frames_list.append(frame)
             print(counter)
@@ -44,7 +44,10 @@ class VideoProcessor:
                 buffer_dict['frames'] = frames_list
                 buffer_dict['timestamp'] = ""
                 vr = VideoRecorder(buffer_dict)
+            """
 
+    def release(self):
+        self.isRunning = False
 
 
 if __name__ == "__main__":

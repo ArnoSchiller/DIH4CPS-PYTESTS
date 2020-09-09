@@ -25,6 +25,7 @@ else:
     import cv2
 import threading
 from configuration import * 
+from mqtt_connection import MQTTConnection
 
 
 class WebcamCapture:
@@ -48,22 +49,32 @@ class WebcamCapture:
     connection_str = global_camera_connection
     frame_width = 0 
     frame_height = 0 
+    device_name = global_user_name
 
     def __init__(self, buffer_object):
         """ Setup video capture and video writer. 
         """
+        self.mqtt_client = MQTTConnection()
         self.buffer = buffer_object
         # initialize video capture
         self.reconnect()
+
  
     
 
     def reconnect(self):
+        """
+        Connect to ip camera. 
+        """
+        self.mqtt_client.sendProcessMessage(self.device_name, self.mqtt_client.status_list["WebcamCapture"]["OpeningCamera"])
         self.capture = cv2.VideoCapture(self.connection_str)
 
         # try to connect to camera
         while not self.capture.isOpened():
+            self.mqtt_client.sendProcessMessage(self.device_name, self.mqtt_client.status_list["WebcamCapture"]["OpeningCameraFailed"])
             self.capture = cv2.VideoCapture(self.connection_str)
+
+        self.mqtt_client.sendProcessMessage(self.device_name, self.mqtt_client.status_list["WebcamCapture"]["OpenedCamera"])
 
         # update frame size
         self.frame_width = int(self.capture.get(3))
@@ -89,6 +100,7 @@ class WebcamCapture:
         """    
         self.is_running = False   
         self.capture.release()
+        self.mqtt_client.sendProcessMessage(self.device_name, self.mqtt_client.status_list["WebcamCapture"]["ClosedCamera"])
         cv2.destroyAllWindows()
 
 

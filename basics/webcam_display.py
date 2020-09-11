@@ -1,9 +1,11 @@
 import cv2
-from LED_control import LEDRing
 from configuration import * 
 
 connection_str = global_camera_connection
 use_light = global_use_light
+
+if use_light:
+    from LED_control import LEDRing
 
 # cap = cv2.VideoCapture(0)
 cap = cv2.VideoCapture(connection_str)

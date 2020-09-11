@@ -1,5 +1,6 @@
 """
-CloudConnection: This class rules the cloud connection (S3 architecture) using boto.
+CloudConnection: This class rules the cloud connection (S3 architecture) using 
+    boto3.
 
 Requirements:                    
 pip install boto3, see https://pypi.org/project/boto3/ for more informations.
@@ -7,14 +8,13 @@ also see https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-upload
 
 @authors:   Arno Schiller (AS)
 @email:     schiller@swms.de
-@version:   v1.0.1
+@version:   v1.0.0
 @license:   ...
 
 VERSION HISTORY
-Version:    (Author) Description:                                           Date:
-v0.0.*      (AS) Version 1. See v1 (cloud_connection).                      05.08.2020\n
-v1.0.0      (AS) First initialize of version 2. Included code from v1.      07.09.2020\n
-v1.0.0      (AS) Updated code in case there is no internet connction.       07.09.2020\n
+Version:    (Author) Description:                                   Date:
+v0.0.*           Version 1. See v1 (cloud_connection).              05.08.2020\n
+v1.0.0      (AS) First initialize of v2. Included code from v1.     07.09.2020\n
 """
 import boto3
 from botocore.exceptions import *

@@ -17,11 +17,11 @@ Links:
 @license:   ...
 
 VERSION HISTORY
-Version:  \t(Author) Description:   \t  \t  \t  \t  \t  \t  \t  \t  \t  \t\tDate:     \n
-v0.0.1    \t(AS) First initialize.  \t  \t  \t  \t  \t  \t  \t  \t  \t  \t\t31.09.2020\n
-v0.0.2    \t(AS) Added functionality to append and get elements from the\t\t31.09.2020\n
-\t  \t  \t  \t\tbuffer. Also added function to visualize the pointers                 \n
-\t  \t  \t  \t\tmovement.                                                             \n
+Version:    (Author) Description:                                   Date:     \n
+v0.0.1      (AS) First initialize.                                  31.09.2020\n
+v0.0.2      (AS) Added functionality to append and get elements     31.09.2020\n
+                from the buffer. Also added function to visualize             \n
+                the pointers movement.                                        \n
 """
 import threading, time
 import numpy as np

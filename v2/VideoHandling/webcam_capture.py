@@ -1,6 +1,6 @@
 """
-WebcamCapture: This module captures the frame from the video stream of the IP camera and
-        saves them into the ring buffer.
+WebcamCapture: This module captures the frame from the video stream of the IP 
+    camera and saves them into the ring buffer.
 
 Requirements:
 - opencv: pip install opencv-python 
@@ -9,14 +9,15 @@ Requirements:
 
 @authors:   Arno Schiller (AS)
 @email:     schiller@swms.de
-@version:   v0.0.8
+@version:   v1.0.0
 @license:   ...
 
-VERSION HISTORY                                                                       \n
-Version:    (Author) Description:                                           Date:     \n
-v0.x.x           see v1 (webcam_recorder) for more informations.            01-09-2020\n
-v1.0.0      (AS) First initialize. Added code from WebcamRecorder. This     01-09-2020\n
-                version does only saves video frames to ring buffer.                  \n
+VERSION HISTORY                                                               \n
+Version:    (Author) Description:                                   Date:     \n
+v0.x.x           see v1 (webcam_recorder) for more informations.    01-09-2020\n
+v1.0.0      (AS) First initialize. Added code from WebcamRecorder.  01-09-2020\n
+                This version does only saves video frames to ring             \n
+                buffer.                                                       \n
 """
 import platform
 if platform.system() == 'Windows':
@@ -66,15 +67,18 @@ class WebcamCapture:
         """
         Connect to ip camera. 
         """
-        self.mqtt_client.sendProcessMessage(self.device_name, self.mqtt_client.status_list["WebcamCapture"]["OpeningCamera"])
+        self.mqtt_client.sendProcessMessage(self.device_name, 
+                self.mqtt_client.status_list["WebcamCapture"]["OpeningCamera"])
         self.capture = cv2.VideoCapture(self.connection_str)
 
         # try to connect to camera
         while not self.capture.isOpened():
-            self.mqtt_client.sendProcessMessage(self.device_name, self.mqtt_client.status_list["WebcamCapture"]["OpeningCameraFailed"])
+            self.mqtt_client.sendProcessMessage(self.device_name, 
+                self.mqtt_client.status_list["WebcamCapture"]["OpeningCameraFailed"])
             self.capture = cv2.VideoCapture(self.connection_str)
 
-        self.mqtt_client.sendProcessMessage(self.device_name, self.mqtt_client.status_list["WebcamCapture"]["OpenedCamera"])
+        self.mqtt_client.sendProcessMessage(self.device_name, 
+                self.mqtt_client.status_list["WebcamCapture"]["OpenedCamera"])
 
         # update frame size
         self.frame_width = int(self.capture.get(3))
@@ -100,7 +104,8 @@ class WebcamCapture:
         """    
         self.is_running = False   
         self.capture.release()
-        self.mqtt_client.sendProcessMessage(self.device_name, self.mqtt_client.status_list["WebcamCapture"]["ClosedCamera"])
+        self.mqtt_client.sendProcessMessage(self.device_name, 
+                self.mqtt_client.status_list["WebcamCapture"]["ClosedCamera"])
         cv2.destroyAllWindows()
 
 

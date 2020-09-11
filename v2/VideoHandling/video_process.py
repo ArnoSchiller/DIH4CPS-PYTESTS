@@ -101,7 +101,7 @@ class VideoProcessor:
                 notDetectedCounter += 1
             else:
                 if not frames_list == []:
-                    vr = VideoRecorder(buffer=frames_list)
+                    vr = VideoRecorder(buffer=frames_list,video_name_addition="process")
                     frames_list.clear()
                         
             if frameCounter >= self.border_resetFirstFrame:

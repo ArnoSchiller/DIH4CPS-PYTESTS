@@ -46,11 +46,13 @@ class VideoRecorder:
     recordsDir_name = global_recordsDir_name
     frames_buffer = None
 
-    def __init__(self, buffer=None, timestamp=None):
+    def __init__(self, buffer=None, timestamp=None, video_name_addition=None):
         """ Setup video capture and video writer. 
         """
         if buffer == None:
             return
+
+        self.video_name_addition = video_name_addition
 
         if timestamp == None:
             self.video_timestamp = datetime.datetime.now()
@@ -89,8 +91,11 @@ class VideoRecorder:
 
     def generate_filename(self, used_datetime=datetime.datetime.now()):
         # generate file name
-        filename = "{0}_{1}-{2:02d}-{3:02d}_{4:02d}-{5:02d}-{6:02d}.avi".format(self.device_name, 
-                                        used_datetime.year, 
+        filename = self.device_name
+        if not self.video_name_addition == None:
+            filename += "_"
+            filename += self.video_name_addition
+        filename += "_{0}-{1:02d}-{2:02d}_{3:02d}-{4:02d}-{5:02d}.avi".format(used_datetime.year, 
                                         used_datetime.month,
                                         used_datetime.day,
                                         used_datetime.hour,
@@ -141,7 +146,7 @@ def record_video(ring_buffer, length_seconds=None, length_frames=None):
         frames_list.append(frame)
         counter += 1
 
-    VideoRecorder(buffer=frames_list, timestamp=video_timestamp)
+    VideoRecorder(buffer=frames_list, timestamp=video_timestamp, video_name_addition="cronjob")
 
     
 

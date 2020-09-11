@@ -1,5 +1,6 @@
 """
-VideoRecorder: This module writes the captured frames from the buffer into a video file.
+VideoRecorder: This module writes the captured frames from the buffer into a 
+video file.
 
 Requirements:
 - opencv: pip install opencv-python 
@@ -8,14 +9,16 @@ Requirements:
 
 @authors:   Arno Schiller (AS)
 @email:     schiller@swms.de
-@version:   v0.0.1
+@version:   v1.0.0
 @license:   ...
 
-VERSION HISTORY                                                                       \n
-Version:    (Author) Description:                                           Date:     \n
-v0.x.x           see v1 (webcam_recorder) for more informations.            02-09-2020\n
-v1.0.0      (AS) First initialize. Added code from webcam_display and       02-09-2020\n
-                included buffer.
+VERSION HISTORY                                                               \n
+Version:    (Author) Description:                                   Date:     \n
+v0.x.x           see v1 (webcam_recorder) for more informations.    02-09-2020\n
+v1.0.0      (AS) First initialize. Added code from webcam_display   02-09-2020\n
+                and included buffer.                                          \n
+v1.0.0      (AS) Added functionality to record a video with a       11-09-2020\n
+                specific length.                                              \n
 """
 
 import platform
@@ -47,7 +50,9 @@ class VideoRecorder:
     frames_buffer = None
 
     def __init__(self, buffer=None, timestamp=None):
-        """ Setup video capture and video writer. 
+        """ Setup internal parameters and the mqtt connection (logging). Also 
+        setup the video writer and start a thread writing the given frames to 
+        file. 
         """
         if buffer == None:
             return
@@ -75,21 +80,27 @@ class VideoRecorder:
         self.file_path = os.path.join(recordsDir_path, self.filename)
     
         self.mqtt_client.sendProcessMessage(self.device_name, 
-                                            self.mqtt_client.status_list["VideoRecorder"]["OpeningWriter"])
+                self.mqtt_client.status_list["VideoRecorder"]["OpeningWriter"])
 
         fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
-        self.writer = cv2.VideoWriter(self.file_path, fourcc, self.fps, (self.frame_width, self.frame_height))
+        self.writer = cv2.VideoWriter(  self.file_path, 
+                                        fourcc, 
+                                        self.fps, 
+                                        (self.frame_width, self.frame_height))
 
         
         self.mqtt_client.sendProcessMessage(self.device_name, 
-                                            self.mqtt_client.status_list["VideoRecorder"]["OpenedWriter"])
+                self.mqtt_client.status_list["VideoRecorder"]["OpenedWriter"])
                 
         th = threading.Thread(target=self.write_frames_to_file)
         th.start()
 
     def generate_filename(self, used_datetime=datetime.datetime.now()):
-        # generate file name
-        filename = "{0}_{1}-{2:02d}-{3:02d}_{4:02d}-{5:02d}-{6:02d}.avi".format(self.device_name, 
+        """
+        returns a generic filename depending on the current or given datetime.
+        """
+        filename = "{0}_{1}-{2:02d}-{3:02d}_{4:02d}-{5:02d}-{6:02d}.avi".format(
+                                        self.device_name, 
                                         used_datetime.year, 
                                         used_datetime.month,
                                         used_datetime.day,
@@ -99,18 +110,20 @@ class VideoRecorder:
         return filename
 
     def write_frames_to_file(self):
-        print("start th")
+        """
+        Writes every frame of the frames_buffer into a video file. 
+        """
         self.mqtt_client.sendProcessMessage(self.device_name, 
-                                            self.mqtt_client.status_list["VideoRecorder"]["RecordingFile"], 
-                                            file=self.filename)
+                self.mqtt_client.status_list["VideoRecorder"]["RecordingFile"], 
+                file=self.filename)
         num_frames = 0
         for frame in self.frames_buffer:
             self.writer.write(frame)
             num_frames += 1
         print("Frames: ", num_frames, " Sekunden: ", num_frames/self.fps)
         self.mqtt_client.sendProcessMessage(self.device_name, 
-                                            self.mqtt_client.status_list["VideoRecorder"]["RecordedFile"], 
-                                            file=self.filename)
+                self.mqtt_client.status_list["VideoRecorder"]["RecordedFile"], 
+                file=self.filename)
         self.release()
 
     def release(self):
@@ -120,14 +133,18 @@ class VideoRecorder:
         self.is_running = False 
         self.writer.release()
         self.mqtt_client.sendProcessMessage(self.device_name, 
-                                            self.mqtt_client.status_list["VideoRecorder"]["ClosedWriter"])
+                self.mqtt_client.status_list["VideoRecorder"]["ClosedWriter"])
+
 
 def record_video(ring_buffer, length_seconds=None, length_frames=None):
-    if length_frames == None and length_seconds == None:
-        return
-
+    """
+    Function to record a video with a specific length. 
+    """
     if not length_seconds == None:
         length_frames = global_camera_fps * length_seconds
+
+    if length_frames == None and length_frames == None:
+        return
 
     print("Recording video with ", length_frames, " frames")
 

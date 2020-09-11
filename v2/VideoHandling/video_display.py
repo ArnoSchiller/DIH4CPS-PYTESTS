@@ -11,11 +11,11 @@ Requirements:
 @version:   v0.0.1
 @license:   ...
 
-VERSION HISTORY                                                                       \n
-Version:    (Author) Description:                                           Date:     \n
-v0.x.x           see basics (webcam_display) for more informations.         01-09-2020\n
-v1.0.0      (AS) First initialize. Added code from webcam_display and       01-09-2020\n
-                included buffer.
+VERSION HISTORY                                                               \n
+Version:    (Author) Description:                                   Date:     \n
+v0.x.x           see basics (webcam_display) for more informations. 01-09-2020\n
+v1.0.0      (AS) First initialize. Added code from webcam_display   01-09-2020\n
+                and included buffer.
 """
 
 import platform

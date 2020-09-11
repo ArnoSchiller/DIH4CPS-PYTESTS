@@ -6,9 +6,14 @@ VideoProcessor:
 @version:   v0.0.1
 @license:   ...
 
-VERSION HISTORY                                                                       \n
-Version:    (Author) Description:                                           Date:     \n
-v1.0.0      (AS) First initialize.                                          02-09-2020\n
+VERSION HISTORY                                                               \n
+Version:    (Author) Description:                                   Date:     \n
+v1.0.0      (AS) First initialize.                                  02-09-2020\n
+v1.0.1      (AS) Included parts of the security camera to test the  10-09-2020\n
+                programm workflow.                                            \n
+v1.0.2      (AS) Tested the security camera. Works fine.            10-09-2020\n
+                programm workflow.                                            \n
+
 """
 
 import threading

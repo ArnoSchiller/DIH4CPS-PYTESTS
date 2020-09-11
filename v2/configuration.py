@@ -7,8 +7,8 @@ WebcamRecorder: This file includes every configuration with global usage.
 @license:   ...
 
 VERSION HISTORY
-Version:    (Author) Description:                                           Date:
-v0.0.1      (AS) First initialize. Added code from example files and        10.08.2020\n
+Version:    (Author) Description:                                   Date:
+v0.0.1      (AS) First initialize. Added important configurations.  10.08.2020\n
 """
 
 global_user_name = "test1"

@@ -1,5 +1,6 @@
 """
-CronHandler: This class creates crontab files and the crontabs can be added ti linux system. 
+CronHandler: This class creates crontab files and the crontabs can be added to 
+linux system. 
 
 Requirements:
 - os, sys (allready installed)
@@ -10,9 +11,9 @@ Requirements:
 @license:   ...
 
 VERSION HISTORY
-Version:    (Author) Description:                                           Date:
-v0.0.1      (AS) See v1 (cronHandler) for more informations.                06.08.2020\n
-v1.0.0      (AS) Updated to v2. removed recorder from crontabs.             07.09.2020\n
+Version:    (Author) Description:                                   Date:
+v0.0.1           See v1 (cronHandler) for more informations.        06.08.2020\n
+v1.0.0      (AS) Updated to v2. removed recorder from crontabs.     07.09.2020\n
     
 Attributes:
 -----------
@@ -72,7 +73,8 @@ class CronHandler:
         Parameters
         ----------
         cron_str : str
-            time the crontab should be executed (cron format: *(min) *(h) *(day) *(month) *(day of week)).
+            time the crontab should be executed 
+            (cron format: *(min) *(h) *(day) *(month) *(day of week)).
         command_str : str
             command should be executed on system.
         outputFile_path : str
@@ -90,9 +92,11 @@ class CronHandler:
         Parameters
         ----------
         index : int
-            index where the crontab was stored in the CronList (from 0 to len(CronList)-1)
+            index where the crontab was stored in the CronList 
+            (from 0 to len(CronList)-1)
         cron_str : str
-            time the crontab should be executed (cron format: *(min) *(h) *(day) *(month) *(day of week)).
+            time the crontab should be executed 
+            (cron format: *(min) *(h) *(day) *(month) *(day of week)).
         command_str : str
             command should be executed on system.
         outputFile_path : str

@@ -1,17 +1,18 @@
 """
-VideoProcessor: 
+job_broker: This module is used to handle internal message exchange. 
 
 @authors:   Arno Schiller (AS)
 @email:     schiller@swms.de
 @version:   v0.0.1
 @license:   ...
 
-VERSION HISTORY                                                                       \n
-Version:    (Author) Description:                                           Date:     \n
-v1.0.0      (AS) First initialize.                                          09-09-2020\n
-v1.0.1      (AS) Tested to use a Queue to exchange internal messages.           10-09-2020\n 
-                Maybe use MessageQueue (https://github.com/ingresse/message-queue-python)                    
-v1.0.2      (AS) Build job handler using local mqtt.           10-09-2020\n                   
+VERSION HISTORY                                                     \n
+Version:    (Author) Description:                                   Date:     \n
+v1.0.0      (AS) First initialize.                                  09-09-2020\n
+v1.0.1      (AS) Tested to use a Queue to exchange internal         10-09-2020\n 
+                messages. Maybe use MessageQueue                              \n
+                (https://github.com/ingresse/message-queue-python)            \n      
+v1.0.2      (AS) Build job handler using local mqtt.                11-09-2020\n                   
 """
 
 import threading
@@ -24,15 +25,21 @@ import paho.mqtt.client as mqtt # pip install paho-mqtt
 
 class JobBroker:
     """ 
-    This class subscibes the job queue and starts jobs. 
+    This class subscibes the local mqtt and starts the  
     
     Attributes:
     ----------- 
+    client : Client (paho.mqtt.cleint)
+        client for mqtt connection
+    ring_buffer : RingBuffer
+        used RingBuffer including captured video frames
+    latest_job : str
+        latest started job so one job will not start multiple times
     """
     latest_job = ""
 
     def __init__(self, ring_buffer):
-        """ Setup video capture and video writer. 
+        """ Setup buffer and mqtt client.  
         """
         print("JobBroker erstellt")
 
@@ -44,10 +51,13 @@ class JobBroker:
 
         self.client.connect("localhost", 1883, 60)
 
-        self.client.loop_forever()
+        self.client.loop_start()
 
     def process_job(self, message):
-        print("Manage ", message)
+        """
+        Called when a message recieved. Will start the task if the message 
+        follows a specific construction.  
+        """
         if message == self.latest_job:
             return
         tag_set, field_set = message.split(" ")
@@ -67,10 +77,14 @@ class JobBroker:
         self.latest_job = message
 
     def on_connect(self, client, userdata, flags, rc):
+        """ Called when the client connected. 
+        """
         print("Connected with result code " + str(rc))
         client.subscribe("IOT/internal")
 
     def on_message(self, client, userdata, msg):
+        """ Called when the client recieves a message from the broker. 
+        """
         print(msg.topic + " " + str(msg.payload))
         message =  str(msg.payload)
         message = message[2:len(message)-1]

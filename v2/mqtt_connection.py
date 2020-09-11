@@ -6,14 +6,15 @@ Requirements:
 
 @authors:   Arno Schiller (AS)
 @email:     schiller@swms.de
-@version:   v0.0.1
+@version:   v1.0.0
 @license:   ...
 
 VERSION HISTORY
-Version:    (Author) Description:                                           Date:
-v0.0.1      (AS) First initialize. See v1 (mqtt_connection) for more.    	07.08.2020\n
-v1.0.0      (AS) Updated to version 2.                                      07.09.2020\n
-v1.0.1      (AS) Included functions to exchange internal messages.          10.09.2020\n
+Version:    (Author) Description:                                   Date:
+v0.0.1           See v1 (mqtt_connection) for more.    	            07.08.2020\n
+v1.0.0      (AS) Updated to version 2.                              07.09.2020\n
+v1.0.1      (AS) Updated code in case there is no internet          07.09.2020\n
+                connction by using try and except.                            \n
 
 Attributes:
 -----------
@@ -163,51 +164,6 @@ class MQTTConnection:
             self.reconnect()
             return self.client.publish("IOT/test", message)
         """
-        
-class LocalMQTTConnection:
-    """
-    This class rules the connection to the MQTT broker (iotstack).
-    """
-    # SSL/TLS1.2 aktivieren. Pub auf den Topic IOT/{irgendwas}
-    
-    mqtt_host = "localhost"
-
-    port = 1883
-    keepalive = 60
-
-
-
-    def __init__(self, on_connect_local = None, on_message_local=None):
-        """ Setup the MQTT connection. 
-        """
-        self.client = mqtt.Client()
-
-        if on_connect_local == None:
-            self.client.on_connect = on_connect
-        else:
-            self.client.on_connect = on_connect_local
-
-            
-        if on_message_local == None:
-            self.client.on_connect = on_message
-        else:
-            self.client.on_connect = on_message_local
-        # self.client.tls_set()
-
-        self.reconnect()
-
-    def reconnect(self):
-        self.client.connect(self.mqtt_host, self.port, self.keepalive)
-        self.client.loop_start()
-
-    def isConnected(self):
-        return self.client.is_connected()
-
-    def sendMessage(self, message, topic="IOT/test"):
-        return self.client.publish(topic, message)
-    
-    def subscribeTopic(self, topic="IOT/test"):
-        self.client.subscribe(topic)
 
 def on_connect(client, userdata, flags, rc):
     """ The callback for when the client receives a CONNACK response from the server.

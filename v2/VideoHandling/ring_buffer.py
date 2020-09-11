@@ -45,7 +45,7 @@ class RingBuffer:
     tail_pos = 0
     element_list = []
     
-    def __init__(self, max_len=10):
+    def __init__(self, max_len=256):
         """
         Constructor creates an RingBuffer object.
         Parameters
@@ -159,6 +159,24 @@ class RingBuffer:
         if second_pointer > first_pointer: 
             return first_pointer - second_pointer + self.max_len
         return first_pointer - second_pointer
+
+    def get_previous_elements(self, n):
+        """
+        Returns the last n frames before the head pointer. 
+
+        Returns
+        ----------
+        element_list : list
+            list of n elements before the head pointer 
+        """
+        
+        distance_t_h = self.get_distance_pointers(self.head_pos, self.tail_pos) - 2
+        if distance_t_h < n:
+            n = distance_t_h
+        element_list = []
+        for i in range(self.head_pos - n, self.head_pos):
+            element_list.append(self.get_element(i))
+        return element_list
 
     def visualize_head_tail(self):
         """

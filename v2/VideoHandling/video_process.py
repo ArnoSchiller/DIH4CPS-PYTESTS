@@ -29,7 +29,7 @@ class VideoProcessor:
     ----------- 
     """
     max_video_len_frames = global_max_video_len_frames
-    border_notDetected = 20         # frames to record after motion is not detected anymore
+    border_notDetected = 40         # frames to record after motion is not detected anymore
     border_resetFirstFrame = 1200   # every minute
     border_contourArea = 500        # minimum area size to recognize motion
 
@@ -71,7 +71,7 @@ class VideoProcessor:
 
         while True:
             
-            frame = self.ring_buffer.get_next_element()[1]
+            diff, frame = self.ring_buffer.get_next_element()
                     
             # resize the frame, convert it to grayscale, and blur it
             scaledFrame = imutils.resize(frame, width=500)
@@ -103,8 +103,19 @@ class VideoProcessor:
                 print("Bewegung erkannt")
                 clearFrameCounter = 0
                 
-                ## hier noch vorherige einbinden wenn frames_list == []
+                if len(frames_list) <= 0:
+                    prev_frames = self.ring_buffer.get_previous_elements(self.border_notDetected)
+                    print(len(prev_frames))
+                    for p_frame in prev_frames:
+                        frames_list.append(p_frame)
+                    
+                if diff > 0:
+                    prev_frames = self.ring_buffer.get_previous_elements(diff)
+                    for p_frame in prev_frames:
+                        frames_list.append(p_frame)
+
                 frames_list.append(frame)
+                
                 notDetectedCounter += 1
             else:
                 if not frames_list == []:

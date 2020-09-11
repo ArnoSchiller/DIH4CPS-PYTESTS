@@ -16,8 +16,8 @@ def on_connect(client, userdata, flags, rc):
 client = mqtt.Client()
 client.on_connect = on_connect
 
-client.connect("192.168.8.131", 1883, 60)
-#client.connect("localhost", 1883, 60)
+#client.connect("192.168.8.131", 1883, 60)
+client.connect("localhost", 1883, 60)
 
 client.loop_start()
 

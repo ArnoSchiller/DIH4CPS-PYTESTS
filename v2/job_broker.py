@@ -47,7 +47,6 @@ class JobBroker:
         self.client.loop_forever()
 
     def process_job(self, message):
-        print("Manage ", message)
         if message == self.latest_job:
             return
         tag_set, field_set = message.split(" ")

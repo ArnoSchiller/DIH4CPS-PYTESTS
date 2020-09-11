@@ -9,7 +9,6 @@ currentdir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0,currentdir) 
 
 from job_broker import JobBroker
-from global_variables import global_job_queue
 from VideoHandling.ring_buffer import RingBuffer
 from VideoHandling.webcam_capture import WebcamCapture
 from VideoHandling.video_display import VideoDisplay
@@ -65,17 +64,19 @@ class DataAcquisition:
                             self.video_capture_object.capture_frames)
         self.video_capture_thread.start()
 
+        
         self.video_display_object = VideoDisplay(self.ring_buffer)
         self.video_display_thread = threading.Thread(target=
                             self.video_display_object.display_frames)
         self.video_display_thread.start()
-
+        
         self.video_process_object = VideoProcessor(self.ring_buffer)
         self.video_processor_thread = threading.Thread(target=
                             self.video_process_object.process_video_data)
         self.video_processor_thread.start()
 
         self.job_broker_object = JobBroker(self.ring_buffer)
+        
         """
         self.job_broker_thread = threading.Thread(target=   
                             self.job_broker_object.process_jobs)

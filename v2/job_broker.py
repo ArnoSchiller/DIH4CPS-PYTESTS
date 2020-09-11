@@ -17,7 +17,6 @@ v1.0.2      (AS) Build job handler using local mqtt.                11-09-2020\n
 
 import threading
 
-from global_variables import get_job_queue
 from VideoHandling.video_record import VideoRecorder, record_video
 import paho.mqtt.client as mqtt # pip install paho-mqtt
 

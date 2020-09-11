@@ -115,7 +115,7 @@ class VideoProcessor:
                 print("reset")
 
             # Bilder anzeigen
-            #"""
+            """
             cv2.imshow("Security Feed", gray)
             cv2.imshow("Thresh", thresh)
             cv2.imshow("Frame Delta", frameDelta)

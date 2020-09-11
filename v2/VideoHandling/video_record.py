@@ -25,8 +25,8 @@ else:
     import cv2
 
 import os, sys
-import threading
-import datetime
+import threading, datetime
+import numpy as np
 
 from configuration import * 
 from mqtt_connection import MQTTConnection
@@ -44,17 +44,26 @@ class VideoRecorder:
     fps = global_camera_fps
     device_name = global_user_name
     recordsDir_name = global_recordsDir_name
+    frames_buffer = None
 
-    def __init__(self, buffer_dict):
+    def __init__(self, buffer=None, timestamp=None):
         """ Setup video capture and video writer. 
         """
+        if buffer == None:
+            return
+
+        if timestamp == None:
+            self.video_timestamp = datetime.datetime.now()
+        else:
+            self.video_timestamp = timestamp
+
+        if not buffer == None:
+            self.frames_buffer = np.copy(buffer)
+            self.video_timestamp = datetime.datetime.now()
+
         self.mqtt_client = MQTTConnection()
 
-        self.frames_buffer = buffer_dict['frames']
-        self.video_timestamp = buffer_dict['timestamp']
-        if self.video_timestamp == "":
-            self.video_timestamp = datetime.datetime.now()
-        (self.frame_height, self.frame_width, _) = self.frames_buffer[0][1].shape
+        (self.frame_height, self.frame_width, _) = self.frames_buffer[0].shape
         
         #print("h ", self.frame_height, " w ", self.frame_width)
         parentDir_path = os.path.dirname(os.path.realpath(__file__))
@@ -94,9 +103,10 @@ class VideoRecorder:
         self.mqtt_client.sendProcessMessage(self.device_name, 
                                             self.mqtt_client.status_list["VideoRecorder"]["RecordingFile"], 
                                             file=self.filename)
-        for index, frame in enumerate(self.frames_buffer):
-            self.writer.write(frame[1])
-        num_frames = index + 1
+        num_frames = 0
+        for frame in self.frames_buffer:
+            self.writer.write(frame)
+            num_frames += 1
         print("Frames: ", num_frames, " Sekunden: ", num_frames/self.fps)
         self.mqtt_client.sendProcessMessage(self.device_name, 
                                             self.mqtt_client.status_list["VideoRecorder"]["RecordedFile"], 
@@ -119,18 +129,19 @@ def record_video(ring_buffer, length_seconds=None, length_frames=None):
     if not length_seconds == None:
         length_frames = global_camera_fps * length_seconds
 
+    print("Recording video with ", length_frames, " frames")
+
     counter = 0
     frames_list = []
 
+    video_timestamp = datetime.datetime.now()
+
     while counter < length_frames:
-        frame = ring_buffer.get_next_element()
+        frame = ring_buffer.get_next_element()[1]
         frames_list.append(frame)
         counter += 1
 
-    buffer_dict = {}
-    buffer_dict['frames'] = frames_list
-    buffer_dict['timestamp'] = ""
-    vr = VideoRecorder(buffer_dict)
+    VideoRecorder(buffer=frames_list, timestamp=video_timestamp)
 
     
 

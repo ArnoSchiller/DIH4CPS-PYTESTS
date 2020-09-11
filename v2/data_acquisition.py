@@ -44,7 +44,7 @@ class DataAcquisition:
         self.video_processor_thread = threading.Thread(target=self.video_process_object.process_video_data)
         self.video_processor_thread.start()
 
-        time.sleep(10)
+        time.sleep(15)
         self.video_capture_object.release()
         self.video_display_object.release()
 

@@ -83,6 +83,7 @@ class VideoRecorder:
         for index, frame in enumerate(self.frames_buffer):
             self.writer.write(frame[1])
         num_frames = index + 1
+        print("end th")
         self.release()
         # print("Frames: ", num_frames, " Sekunden: ", num_frames/self.fps)
 

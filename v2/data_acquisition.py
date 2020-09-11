@@ -63,7 +63,6 @@ class DataAcquisition:
                             self.video_capture_object.capture_frames)
         self.video_capture_thread.start()
 
-        
         self.video_display_object = VideoDisplay(self.ring_buffer)
         self.video_display_thread = threading.Thread(target=
                             self.video_display_object.display_frames)

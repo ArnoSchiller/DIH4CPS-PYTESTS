@@ -11,17 +11,23 @@ Version:    (Author) Description:                                   Date:
 v0.0.1      (AS) First initialize. Added important configurations.  10.08.2020\n
 """
 
+import os
+
 global_user_name = "test1"
 
 # Recorder 
-global_recordsDir_name      = "../Recordings"
+global_recordsDir_name      = "Recordings"
+global_recordsDir_path      = os.path.join("..", global_recordsDir_name)
+
 #global_camera_connection    = "rtsp://192.168.3.70:8554"
 #global_camera_connection    = "rtsp://admin:admin@192.168.3.70:8554"
 #global_camera_connection    = "rtsp://admin:admin@192.168.8.22:8554"
 #global_camera_connection    = "http://root:root@192.168.8.134/mjpg/1/video.mjpg"
 global_camera_connection    = "http://root:root@192.168.178.78/mjpg/1/video.mjpg"
-global_camera_fps           = 20
-global_use_light            = True
+global_camera_fps            = 20
+global_max_video_len_seconds = 10
+global_max_video_len_frames  = global_max_video_len_seconds * global_camera_fps
+global_use_light             = True
 
 # Cloud 
 global_cloud_access_key     = "minio"

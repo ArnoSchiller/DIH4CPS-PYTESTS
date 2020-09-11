@@ -157,7 +157,8 @@ class CloudConnection:
             self.mqtt.sendProcessMessage(self.user_name, self.mqtt.status_list[self.module_name]["ClientError"], file=object_name)
             #logging.error("Client Error")
             return False
-        except Exception:
+        except Exception as e:
+            print(e)
             self.mqtt.sendProcessMessage(self.user_name, self.mqtt.status_list[self.module_name]["UploadError"], file=object_name)
             #logging.error("Client Error")
             return False
@@ -175,18 +176,19 @@ class CloudConnection:
         """
         logging.info("Upload files from {0} ...".format(day_datetime))
         # create the filter string
-        filter_str = "{0}_{1}-{2:02d}-{3:02d}_*-*-*.avi".format(recording_name, 
+        filter_str = "{0}_*_{1}-{2:02d}-{3:02d}_*-*-*.avi".format(recording_name, 
                                     day_datetime.year,
                                     day_datetime.month,
                                     day_datetime.day)
         filter_path = os.path.join(self.recordsDir_path, filter_str)
+        print(filter_path)
         file_paths = glob.glob(filter_path)
 
         for path in file_paths:
             file_name = os.path.basename(path)
             self.uploadFileToCloud(file_name)
 
-        self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["DisconnectedServer"])
+        self.mqtt.sendProcessMessage(self.user_name, self.mqtt.status_list[self.module_name]["DisconnectedServer"])
         logging.info("Upload files from {0} done.".format(day_datetime))
 
     def uploadEveryAviFile(self, recording_name):
@@ -207,7 +209,7 @@ class CloudConnection:
             file_name = os.path.basename(path)
             self.uploadFileToCloud(file_name)
 
-        self.mqtt.sendProcessMessage(self.user_name, self.mqtt.info_list[self.module_name]["DisconnectedServer"])
+        self.mqtt.sendProcessMessage(self.user_name, self.mqtt.status_list[self.module_name]["DisconnectedServer"])
         logging.info("Upload avi files done.")
 
 import sys
@@ -255,5 +257,6 @@ if __name__ == "__main__":
     if args.today:
         uploadFilesFromToday()
     else:
-        uploadFilesFromYesterday()
+        #uploadFilesFromYesterday()
+        uploadFilesFromToday()
 

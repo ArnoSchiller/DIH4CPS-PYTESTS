@@ -46,7 +46,7 @@ class VideoRecorder:
     """
     fps = global_camera_fps
     device_name = global_user_name
-    recordsDir_name = global_recordsDir_name
+    recordsDir_name = global_recordsDir_path
     frames_buffer = None
 
     def __init__(self, buffer=None, timestamp=None, video_name_addition=None):

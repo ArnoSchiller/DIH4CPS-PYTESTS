@@ -19,6 +19,7 @@ v1.0.2      (AS) Tested the security camera. Works fine.            10-09-2020\n
 import threading
 import cv2,imutils
 from VideoHandling.video_record import VideoRecorder
+from configuration import global_max_video_len_frames
 
 class VideoProcessor:
     """ 
@@ -27,6 +28,7 @@ class VideoProcessor:
     Attributes:
     ----------- 
     """
+    max_video_len_frames = global_max_video_len_frames
     border_notDetected = 20         # frames to record after motion is not detected anymore
     border_resetFirstFrame = 1200   # every minute
     border_contourArea = 500        # minimum area size to recognize motion
@@ -63,15 +65,13 @@ class VideoProcessor:
         print("Start")
         firstFrame = None
         notDetectedCounter = self.border_notDetected
-        frameCounter = 0 
+        clearFrameCounter = 0 
         motionDetected = False
         frames_list = []
-        
+
         while True:
             
             frame = self.ring_buffer.get_next_element()[1]
-                
-            frameCounter += 1
                     
             # resize the frame, convert it to grayscale, and blur it
             scaledFrame = imutils.resize(frame, width=500)
@@ -99,19 +99,22 @@ class VideoProcessor:
                     notDetectedCounter = 0
                         
 
-            if motionDetected or notDetectedCounter < self.border_notDetected:
+            if (motionDetected or notDetectedCounter < self.border_notDetected)and len(frames_list) < self.max_video_len_frames:
                 print("Bewegung erkannt")
-                # write frame to output file
+                clearFrameCounter = 0
+                
+                ## hier noch vorherige einbinden wenn frames_list == []
                 frames_list.append(frame)
                 notDetectedCounter += 1
             else:
                 if not frames_list == []:
                     vr = VideoRecorder(buffer=frames_list,video_name_addition="process")
                     frames_list.clear()
+                clearFrameCounter += 1
                         
-            if frameCounter >= self.border_resetFirstFrame:
+            if clearFrameCounter >= self.border_resetFirstFrame:
                 firstFrame = gray
-                frameCounter = 0 
+                clearFrameCounter = 0 
                 print("reset")
 
             # Bilder anzeigen

@@ -3,7 +3,6 @@ This module is used to send a recording job to the running video handling
 process via local mqtt.
 """
 
-from global_variables import get_job_queue
 import paho.mqtt.client as mqtt # pip install paho-mqtt
 import time, datetime
 
@@ -33,6 +32,7 @@ if __name__ == "__main__":
     job = "job,type={0},timestamp={1} videoLength={2}".format(job_type, 
                                                         timestamp, video_len)
 
+    job = "job,type=general process=stop"
     counter = 0
     for i in range(5):
         time.sleep(1)

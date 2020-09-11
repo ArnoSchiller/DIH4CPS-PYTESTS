@@ -54,8 +54,7 @@ class DataAcquisition:
 
     def __init__(self):
         """ Setup video capture, video writer and if needed the video display 
-        object. Also setup the job broker tu rule the internal communication for 
-        job exchange.
+        object. Also setup the job broker tu rule the internal communication for job exchange.
         """
         self.ring_buffer = RingBuffer()
         
@@ -75,17 +74,21 @@ class DataAcquisition:
                             self.video_process_object.process_video_data)
         self.video_processor_thread.start()
 
-        self.job_broker_object = JobBroker(self.ring_buffer)
+        self.job_broker_object = JobBroker(self.ring_buffer,
+                        release_function=self.release)
         
+
+    def release(self):
         """
         self.job_broker_thread = threading.Thread(target=   
                             self.job_broker_object.process_jobs)
         self.job_broker_thread.start()
         """
+        print("new")
         self.video_capture_object.release()
         self.video_display_object.release()
         self.video_process_object.release()
-        # self.job_broker_object.release()
+        self.job_broker_object.release()
 
 if __name__ == "__main__":
     DataAcquisition()

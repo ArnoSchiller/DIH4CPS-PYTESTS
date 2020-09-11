@@ -20,7 +20,8 @@ import threading
 from VideoHandling.video_record import VideoRecorder, record_video
 import paho.mqtt.client as mqtt # pip install paho-mqtt
 
-
+def do_nothing():
+    pass
 
 class JobBroker:
     """ 
@@ -35,12 +36,14 @@ class JobBroker:
     latest_job : str
         latest started job so one job will not start multiple times
     """
-    latest_job = ""
+    latest_job = "" 
 
-    def __init__(self, ring_buffer):
+    def __init__(self, ring_buffer, release_function = do_nothing):
         """ Setup buffer and mqtt client.  
         """
         print("JobBroker erstellt")
+        
+        self.release_fn = release_function
 
         self.ring_buffer = ring_buffer
 
@@ -53,13 +56,10 @@ class JobBroker:
         self.client.loop_start()
 
     def process_job(self, message):
-<<<<<<< HEAD
-=======
         """
         Called when a message recieved. Will start the task if the message 
         follows a specific construction.  
         """
->>>>>>> fce67b6a9ed05d6f979f360db931c4c1baa2347d
         if message == self.latest_job:
             return
         tag_set, field_set = message.split(" ")
@@ -72,11 +72,22 @@ class JobBroker:
             if tag_set.count("type=record") > 0:
                 video_len = 5
                 for field in field_set:
-                     name, value = field.split("=")
-                     if name == "videoLength":
-                         video_len = int(value)
+                    name, value = field.split("=")
+                    if name == "videoLength":
+                        video_len = int(value)
                 record_video(self.ring_buffer, length_seconds=video_len)
+                
+            if tag_set.count("type=general") > 0:
+                for field in field_set:
+                    name, value = field.split("=")
+                    if name == "process" and value == "stop":
+                        self.release_fn()
+
         self.latest_job = message
+
+    def release(self):
+        self.client.loop_stop()
+        print("stop")
 
     def on_connect(self, client, userdata, flags, rc):
         """ Called when the client connected. 
@@ -91,6 +102,8 @@ class JobBroker:
         message =  str(msg.payload)
         message = message[2:len(message)-1]
         self.process_job(message)
+
+
 
 if __name__ == "__main__":
     print("Run data_acquisation.")

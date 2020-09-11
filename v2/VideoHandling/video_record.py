@@ -99,6 +99,9 @@ class VideoRecorder:
         th.start()
 
     def generate_filename(self, used_datetime=datetime.datetime.now()):
+        """
+        returns a generic filename depending on the current or given datetime.
+        """
         filename = self.device_name
         if not self.video_name_addition == None:
             filename += "_"
@@ -109,12 +112,6 @@ class VideoRecorder:
                                         used_datetime.hour,
                                         used_datetime.minute,
                                         used_datetime.second)
-        """
-        returns a generic filename depending on the current or given datetime.
-        """
-        filename = "{0}_{1}-{2:02d}-{3:02d}_{4:02d}-{5:02d}-{6:02d}.avi".format(
-                                        self.device_name, 
-                                        used_datetime.year, 
         return filename
 
     def write_frames_to_file(self):

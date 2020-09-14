@@ -114,5 +114,6 @@ class DataAcquisition:
 if __name__ == "__main__":
     da = DataAcquisition()
     while True:
-        time.sleep(secs=30*60)
+        time.sleep(30*60)
+        print("Check status")
         da.check_process_status()

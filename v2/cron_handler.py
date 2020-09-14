@@ -137,12 +137,6 @@ def updateCrontabInSystem(cronFile_path):
 
 if __name__ == '__main__':
     handler = CronHandler()
-    ### file recording 
-    # send video record job to main process
-    command = handler.jobClient_command
-    handler.addCron(handler.cron_choices["every_10min"],
-                    command, 
-                    handler.jobClient_output)
 
     ### cloud connection 
     # run cloundConnection every day at 00:05 AM
@@ -164,13 +158,13 @@ if __name__ == '__main__':
                     handler.cloudConnection_command, 
                     handler.cloudConnection_output)
     """
-
+    """
     ### system monitoring
     # run system_monitoring every 2 minutes
     handler.addCron(handler.cron_choices["every_2min"], 
                     handler.systemMonitoring_command)
     
     handler.writeCronToFile()
-
+    """     
     # works on linux only
     updateCrontabInSystem(handler.outputFile_path)

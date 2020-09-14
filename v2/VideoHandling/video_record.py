@@ -17,8 +17,9 @@ Version:    (Author) Description:                                   Date:     \n
 v0.x.x           see v1 (webcam_recorder) for more informations.    02-09-2020\n
 v1.0.0      (AS) First initialize. Added code from webcam_display   02-09-2020\n
                 and included buffer.                                          \n
-v1.0.0      (AS) Added functionality to record a video with a       11-09-2020\n
+v1.0.1      (AS) Added functionality to record a video with a       11-09-2020\n
                 specific length.                                              \n
+v1.0.2      (AS) Included direct upload to the recording.           14-09-2020\n
 """
 
 import platform
@@ -33,6 +34,7 @@ import numpy as np
 
 from configuration import * 
 from mqtt_connection import MQTTConnection
+from cloud_connection import CloudConnection
 
 
 class VideoRecorder:
@@ -49,7 +51,11 @@ class VideoRecorder:
     recordsDir_name = global_recordsDir_path
     frames_buffer = None
 
-    def __init__(self, buffer=None, timestamp=None, video_name_addition=None):
+    def __init__(self, 
+                buffer=None, 
+                timestamp=None, 
+                video_name_addition=None,
+                direct_upload=True):
         """  
         Setup internal parameters and the mqtt connection (logging). Also 
         setup the video writer and start a thread writing the given frames to 
@@ -57,6 +63,8 @@ class VideoRecorder:
         """
         if buffer == None:
             return
+
+        self.direct_upload = direct_upload
 
         self.video_name_addition = video_name_addition
 
@@ -130,6 +138,10 @@ class VideoRecorder:
                 self.mqtt_client.status_list["VideoRecorder"]["RecordedFile"], 
                 file=self.filename)
         self.release()
+
+        if self.direct_upload:
+            cloud_connection = CloudConnection()
+            cloud_connection.uploadFileToCloud(file_name=self.file_name)
 
     def release(self):
         """

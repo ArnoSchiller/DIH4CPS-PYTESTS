@@ -8,15 +8,17 @@ also see https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-upload
 
 @authors:   Arno Schiller (AS)
 @email:     schiller@swms.de
-@version:   v1.0.0
+@version:   v1.0.1
 @license:   ...
 
 VERSION HISTORY
 Version:    (Author) Description:                                   Date:
 v0.0.*           Version 1. See v1 (cloud_connection).              05.08.2020\n
 v1.0.0      (AS) First initialize of v2. Included code from v1.     07.09.2020\n
+v1.0.1      (AS) Added --all to argparse to upload every avi file.  14.09.2020\n
 """
 import boto3
+from botocore.client import Config
 from botocore.exceptions import *
 import os, glob
 import datetime, time
@@ -76,19 +78,23 @@ class CloudConnection:
         while self.s3_client == None:
             if counter_tries == 0:
                 # logging.info("Connecting to S3 server...")
-                self.mqtt.sendProcessMessage(self.user_name, self.mqtt.status_list[self.module_name]["ConnectingToServer"])
+                self.mqtt.sendProcessMessage(self.user_name, 
+                    self.mqtt.status_list[self.module_name]["ConnectingToServer"])
             if counter_tries > self.max_tries:
                 # logging.error("Can not connect to S3 server ({0} tries). Quitting...".format(counter_tries))
-                self.mqtt.sendProcessMessage(self.user_name, self.mqtt.status_list[self.module_name]["ConnectServerError"])
+                self.mqtt.sendProcessMessage(self.user_name, 
+                    self.mqtt.status_list[self.module_name]["ConnectServerError"])
                 exit()
             self.s3_client = boto3.client('s3', 
                 aws_access_key_id = self.access_key,
                 aws_secret_access_key = self.secret_key,
                 endpoint_url=self.cloud_url, 
+                verify=False,
                 config=boto3.session.Config(signature_version='s3v4'))
             counter_tries += 1
-            time.sleep(5)
-        self.mqtt.sendProcessMessage(self.user_name, self.mqtt.status_list[self.module_name]["ConnectedToServer"])
+            time.sleep(1)
+        self.mqtt.sendProcessMessage(self.user_name, 
+            self.mqtt.status_list[self.module_name]["ConnectedToServer"])
         # logging.info("Connected to S3 server.")
 
         # get directory 
@@ -123,43 +129,52 @@ class CloudConnection:
         """
         if object_name == None:
             object_name = file_name
-        self.mqtt.sendProcessMessage(self.user_name, self.mqtt.status_list[self.module_name]["UploadingFile"], file=object_name)
+        self.mqtt.sendProcessMessage(self.user_name, 
+            self.mqtt.status_list[self.module_name]["UploadingFile"], file=object_name)
         # logging.info("Uploading file {0} ...".format(object_name))
         file_path = os.path.join(self.recordsDir_path, file_name)
         try:
-            self.s3_client.upload_file(file_path, self.bucket_name,object_name, Callback=ProgressPercentage(file_path))
+            self.s3_client.upload_file(file_path, self.bucket_name,object_name, 
+                Callback=ProgressPercentage(file_path))
 
             # Prove if the upload was successfully
             content = self.s3_client.head_object(Bucket=self.bucket_name,Key=object_name)
             if content.get('ResponseMetadata',None) is not None:
                 logging.info("File exists - s3://%s/%s " %(self.bucket_name,object_name))
-                self.mqtt.sendProcessMessage(self.user_name, self.mqtt.status_list[self.module_name]["UploadedFile"], file=object_name)
+                self.mqtt.sendProcessMessage(self.user_name, 
+                    self.mqtt.status_list[self.module_name]["UploadedFile"], file=object_name)
                 time.sleep(1)
-                self.mqtt.sendProcessMessage(self.user_name, self.mqtt.status_list[self.module_name]["UploadReady"], file=object_name)
+                self.mqtt.sendProcessMessage(self.user_name, 
+                    self.mqtt.status_list[self.module_name]["UploadReady"], file=object_name)
                 # if upload was successful, delete the file 
                 if os.path.exists(file_path):
                     os.remove(file_path)
 
             else:
                 logging.info("File does not exist - s3://%s/%s " %(self.bucket_name,object_name))
-                self.mqtt.sendProcessMessage(self.user_name, self.mqtt.status_list[self.module_name]["UploadError"], file=object_name)
+                self.mqtt.sendProcessMessage(self.user_name, 
+                    self.mqtt.status_list[self.module_name]["UploadError"], file=object_name)
 
             return True
         except FileNotFoundError:
-            self.mqtt.sendProcessMessage(self.user_name, self.mqtt.status_list[self.module_name]["FileNotFound"], file=object_name)
+            self.mqtt.sendProcessMessage(self.user_name, 
+                self.mqtt.status_list[self.module_name]["FileNotFound"], file=object_name)
             #logging.error("The file to upload was not found.")
             return False
         except NoCredentialsError:
-            self.mqtt.sendProcessMessage(self.user_name, self.mqtt.status_list[self.module_name]["NoCredentials"], file=object_name)
+            self.mqtt.sendProcessMessage(self.user_name, 
+                self.mqtt.status_list[self.module_name]["NoCredentials"], file=object_name)
             #logging.error("Credentials are not available.")
             return False
         except ClientError:
-            self.mqtt.sendProcessMessage(self.user_name, self.mqtt.status_list[self.module_name]["ClientError"], file=object_name)
+            self.mqtt.sendProcessMessage(self.user_name, 
+                self.mqtt.status_list[self.module_name]["ClientError"], file=object_name)
             #logging.error("Client Error")
             return False
         except Exception as e:
             print(e)
-            self.mqtt.sendProcessMessage(self.user_name, self.mqtt.status_list[self.module_name]["UploadError"], file=object_name)
+            self.mqtt.sendProcessMessage(self.user_name,    
+                self.mqtt.status_list[self.module_name]["UploadError"], file=object_name)
             #logging.error("Client Error")
             return False
 
@@ -188,10 +203,11 @@ class CloudConnection:
             file_name = os.path.basename(path)
             self.uploadFileToCloud(file_name)
 
-        self.mqtt.sendProcessMessage(self.user_name, self.mqtt.status_list[self.module_name]["DisconnectedServer"])
+        self.mqtt.sendProcessMessage(self.user_name, 
+            self.mqtt.status_list[self.module_name]["DisconnectedServer"])
         logging.info("Upload files from {0} done.".format(day_datetime))
 
-    def uploadEveryAviFile(self, recording_name):
+    def uploadEveryAviFile(self, recording_name=None):
         """ Upload every avi file in the Recordings directory.
 
         Parameters
@@ -199,6 +215,9 @@ class CloudConnection:
         recording_name : str
             representative name for clear attribution of the recording (see WebcamRecorder)
         """
+        if recording_name == None:
+            recording_name = self.user_name
+
         logging.info("Upload every avi file ...")
         # create the filter string
         filter_str = "*.avi"
@@ -209,7 +228,8 @@ class CloudConnection:
             file_name = os.path.basename(path)
             self.uploadFileToCloud(file_name)
 
-        self.mqtt.sendProcessMessage(self.user_name, self.mqtt.status_list[self.module_name]["DisconnectedServer"])
+        self.mqtt.sendProcessMessage(self.user_name, 
+            self.mqtt.status_list[self.module_name]["DisconnectedServer"])
         logging.info("Upload avi files done.")
 
 import sys
@@ -236,16 +256,6 @@ class ProgressPercentage(object):
                     self._size, percentage))
             sys.stdout.flush()
     
-         
-def uploadFilesFromToday():
-    s3Con = CloudConnection()
-    today = datetime.datetime.now() 
-    s3Con.uploadFilesFromDay("test1", today)
-
-def uploadFilesFromYesterday():
-    s3Con = CloudConnection()
-    yesterday = datetime.datetime.now() - timedelta(days = 1)
-    s3Con.uploadFilesFromDay("test1", yesterday)
 
 if __name__ == "__main__":
 
@@ -253,10 +263,23 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--today", help="upload files recorded today, default is yesterday.",
 			action="store_true")
+    parser.add_argument("-a", "--all", help="upload every avi file from directory.",
+			action="store_true")
     args = parser.parse_args()
-    if args.today:
-        uploadFilesFromToday()
-    else:
-        #uploadFilesFromYesterday()
-        uploadFilesFromToday()
 
+    s3Con = CloudConnection()
+    if args.today:
+        # upload files from today
+        today = datetime.datetime.now() 
+        s3Con.uploadFilesFromDay("test1", today)
+    elif args.all:
+        # upload every file from dir
+        s3Con = CloudConnection()
+        s3Con.uploadEveryAviFile()
+    else:
+        # upload files from yesterday
+        yesterday = datetime.datetime.now() - timedelta(days = 1)
+        s3Con.uploadFilesFromDay("test1", yesterday)
+
+        
+    """

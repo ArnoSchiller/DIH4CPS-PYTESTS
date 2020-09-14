@@ -14,6 +14,10 @@ VERSION HISTORY
 Version:    (Author) Description:                                   Date:
 v0.0.1           See v1 (cronHandler) for more informations.        06.08.2020\n
 v1.0.0      (AS) Updated to v2. removed recorder from crontabs.     07.09.2020\n
+v1.0.0      (AS) Removed WebcamRecorder. Using JobClient now.       14.09.2020\n
+v1.0.1      (AS) Set CloudConnection to every 6 hours because       14.09.2020\n
+                using direct upload yet. If there were any problems           \n
+                uploading one file, this call should upload file.             \n
     
 Attributes:
 -----------
@@ -56,16 +60,17 @@ class CronHandler:
         # self.python_path = os.path.join(self.parentDir_path, ".venv/Scripts/python.exe")  # for windows venv
         # self.python_path = os.path.join(self.parentDir_path, ".linux_venv/bin/python3")     # for linux venv
 
-        self.webcamRecorder_path = os.path.join(self.parentDir_path, "webcam_recorder.py")
-        self.cloudConnection_path = os.path.join(self.parentDir_path, "cloud_connection.py")
-        self.systemMonitoring_path = os.path.join(self.parentDir_path, "system_monitoring.py")
+        self.jobClient_path = os.path.join(self.parentDir_path, "job_client_record.py")
+        self.jobClient_path_command = "{0} {1}".format(self.python_path, self.jobClient_path)
+        self.jobClient_path_output = os.path.join(self.parentDir_path, "log_job_client.txt")
 
-        self.webcamRecorder_command = "{0} {1}".format(self.python_path, self.webcamRecorder_path)
+        self.cloudConnection_path = os.path.join(self.parentDir_path, "cloud_connection.py")
         self.cloudConnection_command = "{0} {1}".format(self.python_path, self.cloudConnection_path)
+        self.cloudConnection_output = os.path.join(self.parentDir_path, "log_cloud_connection.txt")
+
+        self.systemMonitoring_path = os.path.join(self.parentDir_path, "system_monitoring.py")
         self.systemMonitoring_command = "{0} {1}".format(self.python_path, self.systemMonitoring_path)
 
-        self.webcamRecorder_output = os.path.join(self.parentDir_path, "log_webcam_recorder.txt")
-        self.cloudConnection_output = os.path.join(self.parentDir_path, "log_cloud_connection.txt")
 
     def addCron(self, cron_str, command_str, outputFile_path=None):
         """ Add new crontab to cronList
@@ -132,24 +137,24 @@ def updateCrontabInSystem(cronFile_path):
 
 if __name__ == '__main__':
     handler = CronHandler()
+    ### file recording 
+    # send video record job to main process
+
+
+    ### cloud connection 
+    # run cloundConnection every day at 00:05 AM
+    command = handler.cloudConnection_command + " --today"
+    handler.addCron(handler.cron_choices["every_day_00_05"], 
+                    command, 
+                    handler.cloudConnection_output)
 
     """
-    videoLen = 30
-    if videoLen > 0 and videoLen < 300:
-        handler.webcamRecorder_command += " --videoLength {}".format(videoLen)
-    # run WebCamRecorder every 10 minutes
-    handler.addCron(handler.cron_choices["every_min"], 
-                    handler.webcamRecorder_command, 
-                    handler.webcamRecorder_output)
-	"""
-
     # run cloundConnection every 30 minutes
     handler.cloudConnection_command += " --today"
     handler.addCron(handler.cron_choices["every_30min"], 
                     handler.cloudConnection_command, 
                     handler.cloudConnection_output)
                     
-    """
     # run cloundConnection every 2 hours
     handler.cloudConnection_command += " --today"
     handler.addCron(handler.cron_choices["every_2hour_00"], 
@@ -157,13 +162,7 @@ if __name__ == '__main__':
                     handler.cloudConnection_output)
     """
 
-    """
-    # run cloundConnection every day at 00:05 AM
-    handler.addCron(handler.cron_choices["every_day_00_05"], 
-                    handler.cloudConnection_command, 
-                    handler.cloudConnection_output)
-    """
-
+    ### system monitoring
     # run system_monitoring every 2 minutes
     handler.addCron(handler.cron_choices["every_2min"], 
                     handler.systemMonitoring_command)

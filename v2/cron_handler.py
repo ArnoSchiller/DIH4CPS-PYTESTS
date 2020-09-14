@@ -60,7 +60,7 @@ class CronHandler:
         # self.python_path = os.path.join(self.parentDir_path, ".venv/Scripts/python.exe")  # for windows venv
         # self.python_path = os.path.join(self.parentDir_path, ".linux_venv/bin/python3")     # for linux venv
 
-        self.jobClient_path = os.path.join(self.parentDir_path, "job_client_record.py")
+        self.jobClient_path = os.path.join(self.parentDir_path, "job_client.py")
         self.jobClient_path_command = "{0} {1}".format(self.python_path, self.jobClient_path)
         self.jobClient_path_output = os.path.join(self.parentDir_path, "log_job_client.txt")
 
@@ -143,7 +143,7 @@ if __name__ == '__main__':
 
     ### cloud connection 
     # run cloundConnection every day at 00:05 AM
-    command = handler.cloudConnection_command + " --today"
+    command = handler.cloudConnection_command + " --all"
     handler.addCron(handler.cron_choices["every_day_00_05"], 
                     command, 
                     handler.cloudConnection_output)

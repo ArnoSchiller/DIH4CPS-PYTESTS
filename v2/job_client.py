@@ -32,7 +32,7 @@ if __name__ == "__main__":
     job = "job,type={0},timestamp={1} videoLength={2}".format(job_type, 
                                                         timestamp, video_len)
 
-    job = "job,type=general process=stop"
+    #job = "job,type=general process=stop"
     counter = 0
     for i in range(5):
         time.sleep(1)

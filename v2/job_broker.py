@@ -16,6 +16,7 @@ v1.0.2      (AS) Build job handler using local mqtt.                11-09-2020\n
 """
 
 import threading
+import os
 
 from VideoHandling.video_record import VideoRecorder, record_video
 import paho.mqtt.client as mqtt # pip install paho-mqtt
@@ -41,8 +42,12 @@ class JobBroker:
     def __init__(self, ring_buffer, release_function = do_nothing):
         """ Setup buffer and mqtt client.  
         """
+        # make sure mosquitto is running 
+        os.system(os.path.abspath("sudo service mosquitto stop"))
+        os.system(os.path.abspath("sudo service mosquitto start"))
+
         print("JobBroker erstellt")
-        
+
         self.release_fn = release_function
 
         self.ring_buffer = ring_buffer

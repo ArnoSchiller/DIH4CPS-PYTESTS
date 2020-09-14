@@ -40,6 +40,9 @@ class DataAcquisition:
     job_broker_object = JobBroker 
         object to reciev and handle internal messages (job exchange)
     """
+
+    with_display = False
+
     video_capture_object = None
     video_capture_thread = None
 
@@ -50,11 +53,10 @@ class DataAcquisition:
     video_process_thread = None
 
     job_broker_object = None
-    job_broker_thread = None
 
     def __init__(self):
         """ Setup video capture, video writer and if needed the video display 
-        object. Also setup the job broker tu rule the internal communication for job exchange.
+        object. Also setup the job broker to rule the internal communication for job exchange.
         """
         self.ring_buffer = RingBuffer()
         
@@ -62,20 +64,40 @@ class DataAcquisition:
         self.video_capture_thread = threading.Thread(target=
                             self.video_capture_object.capture_frames)
         self.video_capture_thread.start()
-
-        self.video_display_object = VideoDisplay(self.ring_buffer)
-        self.video_display_thread = threading.Thread(target=
-                            self.video_display_object.display_frames)
-        self.video_display_thread.start()
         
         self.video_process_object = VideoProcessor(self.ring_buffer)
         self.video_processor_thread = threading.Thread(target=
                             self.video_process_object.process_video_data)
         self.video_processor_thread.start()
+        
+        if self.with_display:
+            self.video_display_object = VideoDisplay(self.ring_buffer)
+            self.video_display_thread = threading.Thread(target=
+                                self.video_display_object.display_frames)
+            self.video_display_thread.start()
 
         self.job_broker_object = JobBroker(self.ring_buffer,
                         release_function=self.release)
-        
+    
+    def check_process_status(self):
+        if not self.video_capture_thread.is_alive():
+            self.video_capture_object.is_running = True
+            self.video_capture_thread = threading.Thread(target=
+                            self.video_capture_object.capture_frames)
+            self.video_capture_thread.start()
+
+        if not self.video_process_thread.is_alive():
+            self.video_process_object.isRunning = True
+            self.video_processor_thread = threading.Thread(target=
+                            self.video_process_object.process_video_data)
+            self.video_processor_thread.start()
+
+        if self.with_display:
+            if not self.video_display_thread.is_alive():
+                self.video_display_object.is_running = True
+                self.video_display_thread = threading.Thread(target=
+                                self.video_display_object.display_frames)
+                self.video_display_thread.start()
 
     def release(self):
         """
@@ -90,4 +112,7 @@ class DataAcquisition:
         self.job_broker_object.release()
 
 if __name__ == "__main__":
-    DataAcquisition()
+    da = DataAcquisition()
+    while True:
+        time.sleep(secs=30*60)
+        da.check_process_status()

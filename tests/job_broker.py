@@ -42,9 +42,11 @@ class JobBroker:
     def __init__(self, ring_buffer, release_function = do_nothing):
         """ Setup buffer and mqtt client.  
         """
+        """ does not work, but is not needed too (if system boots correct)
         # make sure mosquitto is running 
-        os.system(os.path.abspath("sudo service mosquitto stop"))
-        os.system(os.path.abspath("sudo service mosquitto start"))
+        os.system(os.path.abspath("sudo /etc/init.d/mosquitto stop"))
+        os.system(os.path.abspath("sudo /etc/init.d/mosquitto start"))
+        """"
 
         print("JobBroker erstellt")
 

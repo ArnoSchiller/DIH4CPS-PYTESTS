@@ -61,8 +61,8 @@ class CronHandler:
         # self.python_path = os.path.join(self.parentDir_path, ".linux_venv/bin/python3")     # for linux venv
 
         self.jobClient_path = os.path.join(self.parentDir_path, "job_client.py")
-        self.jobClient_path_command = "{0} {1}".format(self.python_path, self.jobClient_path)
-        self.jobClient_path_output = os.path.join(self.parentDir_path, "log_job_client.txt")
+        self.jobClient_command = "{0} {1}".format(self.python_path, self.jobClient_path)
+        self.jobClient_output = os.path.join(self.parentDir_path, "log_job_client.txt")
 
         self.cloudConnection_path = os.path.join(self.parentDir_path, "cloud_connection.py")
         self.cloudConnection_command = "{0} {1}".format(self.python_path, self.cloudConnection_path)
@@ -139,7 +139,10 @@ if __name__ == '__main__':
     handler = CronHandler()
     ### file recording 
     # send video record job to main process
-
+    command = handler.jobClient_command
+    handler.addCron(handler.cron_choices["every_10min"],
+                    command, 
+                    handler.jobClient_output)
 
     ### cloud connection 
     # run cloundConnection every day at 00:05 AM

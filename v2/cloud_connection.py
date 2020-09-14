@@ -280,6 +280,3 @@ if __name__ == "__main__":
         # upload files from yesterday
         yesterday = datetime.datetime.now() - timedelta(days = 1)
         s3Con.uploadFilesFromDay("test1", yesterday)
-
-        
-    """

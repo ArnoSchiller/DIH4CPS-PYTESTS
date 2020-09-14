@@ -87,8 +87,8 @@ class VideoRecorder:
         if not os.path.exists(recordsDir_path):
             os.mkdir(recordsDir_path)
 
-        self.filename = self.generate_filename(self.video_timestamp)
-        self.file_path = os.path.join(recordsDir_path, self.filename)
+        self.file_name = self.generate_filename(self.video_timestamp)
+        self.file_path = os.path.join(recordsDir_path, self.file_name)
     
         self.mqtt_client.sendProcessMessage(self.device_name, 
                 self.mqtt_client.status_list["VideoRecorder"]["OpeningWriter"])
@@ -128,7 +128,7 @@ class VideoRecorder:
         """
         self.mqtt_client.sendProcessMessage(self.device_name, 
                 self.mqtt_client.status_list["VideoRecorder"]["RecordingFile"], 
-                file=self.filename)
+                file=self.file_name)
         num_frames = 0
         for frame in self.frames_buffer:
             self.writer.write(frame)
@@ -136,7 +136,7 @@ class VideoRecorder:
         print("Frames: ", num_frames, " Sekunden: ", num_frames/self.fps)
         self.mqtt_client.sendProcessMessage(self.device_name, 
                 self.mqtt_client.status_list["VideoRecorder"]["RecordedFile"], 
-                file=self.filename)
+                file=self.file_name)
         self.release()
 
         if self.direct_upload:

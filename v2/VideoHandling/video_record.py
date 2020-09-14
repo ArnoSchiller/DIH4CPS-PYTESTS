@@ -74,7 +74,8 @@ class VideoRecorder:
             self.video_timestamp = timestamp
 
         if not buffer == None:
-            self.frames_buffer = np.copy(buffer)
+            # self.frames_buffer = np.copy(buffer)
+            self.frames_buffer = buffer
             self.video_timestamp = datetime.datetime.now()
 
         self.mqtt_client = MQTTConnection()

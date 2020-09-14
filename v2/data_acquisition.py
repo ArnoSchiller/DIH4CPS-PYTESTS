@@ -3,16 +3,22 @@ This module is the main component of the data acquisition and starts every
 needed process as a thread. 
 """
 import os, sys
-import threading, time
+import datetime, time
+import threading 
 
 currentdir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0,currentdir) 
 
-from job_broker import JobBroker
 from VideoHandling.ring_buffer import RingBuffer
 from VideoHandling.webcam_capture import WebcamCapture
 from VideoHandling.video_display import VideoDisplay
 from VideoHandling.video_process import VideoProcessor
+
+from job_timer import JobTimer
+
+from configuration import global_record_frequency_s
+from configuration import global_record_video_length_s
+from configuration import global_with_video_display
 
 class DataAcquisition:
     """ 
@@ -41,7 +47,7 @@ class DataAcquisition:
         object to reciev and handle internal messages (job exchange)
     """
 
-    with_display = False
+    with_display = global_with_video_display
 
     video_capture_object = None
     video_capture_thread = None
@@ -76,8 +82,10 @@ class DataAcquisition:
                                 self.video_display_object.display_frames)
             self.video_display_thread.start()
 
-        self.job_broker_object = JobBroker(self.ring_buffer,
-                        release_function=self.release)
+        self.job_timer_object = JobTimer(ring_buffer=self.ring_buffer,
+                                    video_length=global_record_video_length_s,
+                                    duration=global_record_frequency_s)
+
     
     def check_process_status(self):
         if not self.video_capture_thread.is_alive():
@@ -92,6 +100,11 @@ class DataAcquisition:
                             self.video_process_object.process_video_data)
             self.video_processor_thread.start()
 
+        if not self.job_timer_object.isRunning:
+            self.job_timer_object = JobTimer(ring_buffer=self.ring_buffer,
+                                    video_length=global_record_video_length_s,
+                                    duration=global_record_frequency_s)
+
         if self.with_display:
             if not self.video_display_thread.is_alive():
                 self.video_display_object.is_running = True
@@ -100,19 +113,12 @@ class DataAcquisition:
                 self.video_display_thread.start()
 
     def release(self):
-        """
-        self.job_broker_thread = threading.Thread(target=   
-                            self.job_broker_object.process_jobs)
-        self.job_broker_thread.start()
-        """
-        print("new")
         self.video_capture_object.release()
         self.video_display_object.release()
         self.video_process_object.release()
         self.job_broker_object.release()
 
+
 if __name__ == "__main__":
     da = DataAcquisition()
-    while True:
-        time.sleep(secs=30*60)
-        da.check_process_status()
+    #da.check_process_status()

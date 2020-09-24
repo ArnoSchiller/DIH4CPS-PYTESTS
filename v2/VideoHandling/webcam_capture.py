@@ -69,13 +69,13 @@ class WebcamCapture:
         """
         self.mqtt_client.sendProcessMessage(self.device_name, 
                 self.mqtt_client.status_list["WebcamCapture"]["OpeningCamera"])
-        self.capture = cv2.VideoCapture(self.connection_str)
+        self.create_video_capture()
 
         # try to connect to camera
         while not self.capture.isOpened():
             self.mqtt_client.sendProcessMessage(self.device_name, 
                 self.mqtt_client.status_list["WebcamCapture"]["OpeningCameraFailed"])
-            self.capture = cv2.VideoCapture(self.connection_str)
+            self.create_video_capture()
 
         self.mqtt_client.sendProcessMessage(self.device_name, 
                 self.mqtt_client.status_list["WebcamCapture"]["OpenedCamera"])
@@ -83,6 +83,14 @@ class WebcamCapture:
         # update frame size
         self.frame_width = int(self.capture.get(3))
         self.frame_height = int(self.capture.get(4))
+    
+    def create_video_capture(self):
+        if platform.node == 'phyboard-nunki-imx6-1':
+            self.capture = cv2.VideoCapture(self.connection_str, cv2.CAP_V4L2)
+            return
+        self.capture = cv2.VideoCapture(self.connection_str)
+
+
 
     def capture_frames(self):
         self.is_running = True

@@ -1,0 +1,147 @@
+
+Deutsch (English below)
+=======================
+
+Anleitung zur v4l2-Device Initialisierung einer phyCAM auf einem i.MX6 Board
+============================================================================
+
+Der Zugriff auf eine phyCAM Kamera erfolgt über das v4l2 interface.
+Voraussetzung dafür ist die Abbildung der Kamera als ".../dev/video[x]" Device. 
+
+Die nachfolgenden Schritte zeigen die Initialisierung der phyCAM als v4l2 Device.
+Der Zugriff auf die Kamera, erfolgt dann über dieses Device.
+Die v4l2 Schnittstelle wird unter anderen unterstützt von den Programmen:
+- GStreamer
+- OpenCV
+- HALCON
+- save_raw (C-Programm Beispiel)
+
+
+Schritte:
+1) Kamera im bootloader anmelden
+2) Kamera als v4l2 Device initialisieren
+3) Einstellung der Kameraparameter 
+
+
+Voraussetzung:
+- PD18.1.0, i.MX6 (phyBOARD Nunki, Mira oder phyFLEX)
+- min. 1GB RAM
+
+
+Schritt 1)
+==========
+Je nach Kit Ausführungen können verschiedene phyCAM Kameras an den verschiedenen Kameraschnittstellen angeschlossen werden.
+Damit die Kamera vom System erkannt werden kann, muß die Kamera im Bootloader eingetragen werden.
+Dieser Eintrag wird dauerhaft im Bootloader Environment gespeichert.
+
+Je nach Kit Ausführung folgen Sie bitte den "xxx_Getting_Started_xxx" Anweisungen des jeweiligen Moduls/Kits.
+Sie finden diese Anweisungen auf unserem FTP Server im Verzeichnis des jeweiligen Moduls:
+ftp://ftp.phytec.de/pub/ImageProcessing/
+
+Beispiel: phyBOARD-Nunki i.MX6 PD18.1.0
+Pfad: ftp://ftp.phytec.de/pub/ImageProcessing/phyBOARD-Nunki-i.MX6_linux_PD18.1.x/Dokumentation/phyCAM_with_phyBOARD-Nunki-iMX6_Getting_Started_A0.pdf
+
+Die Anmeldung wird dauerhaft im bootloader gespeichert.
+
+
+Schritt 2)
+==========
+Die Initialisierung als v4l2 Device erfolgt durch das "medi-ctl" frame work. 
+Die Aufrufe können auf Konsolenebene oder aus einem eigenen C-Programm heraus erfolgen.
+Für den Aufruf auf Konsolenebene können Sie die mitgelieferten Scripte verwenden:
+- init_bw_phyCAM_v4l_device.sh (monochrome Kamera)
+- init_col_phyCAM_v4l_device.sh (color Kamera)
+Kopieren Sie dazu die beiden scripte in das Verzeichnis ".../gstreamer-examples/..."
+Ändern Sie die die Dateiattribute:
+  * chmod 755 init_bw_phyCAM_v4l_device.sh
+  * chmod 755 init_col_phyCAM_v4l_device.sh
+
+Je nachdem ob Sie eine monochrome oder color Kamera verwenden, können Sie nun das Script aufrufen.
+Das Script stellt nun die erforderlichen Parameter der Kamera ein und gibt das .../dev/video[x] Device aus.
+Mit diesem Device können Sie nun auf die Kamera zugreifen.
+Soweit keine Änderung der Auflösung oder des Datenformats notwendig ist, erfolgt der Aufruf nur einmalig zur Laufzeit.
+
+
+Schritt 3)
+==========
+Die Kameras bieten ebenfalls die Möglichkeit bestimmte Kameraparameter einzustellen (shutter, gain, BLC, ...).
+Dazu kann das "v4l2-ctl" frame work verwendet werden.
+Der Aufruf und die möglichen Parameter sind in dem jeweiligen Unterverzeichnis
+ .../gstreamer-examples/more_[Name des Kamerasensors]_scripts zu finden
+
+Kameraregister die noch nicht im Treiber abgebildet sind, können auch durch einen direkten Registerzugriff via i2c gesetzt werden.
+Ein entsprechendes Tool finden Sie im Verzeichnis .../gstreamer-examples/tools/i2c
+
+
+--------------------------------------------------------------------------------------------------------------------------
+
+English 
+=======
+
+Instructions for v4l2 device initialization of a phyCAM on an i.MX6 board
+=========================================================================
+
+Access to a phyCAM camera is via the v4l2 interface.
+Prerequisite for this is to map the camera as ".../dev/video[x]" Device. 
+
+The following steps show the initialization of the phyCAM as a v4l2 device.
+Access to the camera is to do via this device.
+The v4l2 interface is supported with this programs:
+- GStreamer
+- OpenCV
+- HALCON
+- save_raw (C-program example)
+
+
+Steps:
+1) Register the camera in the bootloader
+2) Initialize camera as v4l2 device
+3) Setting the camera parameters
+
+
+Requirements:
+- PD18.1.0, i.MX6 (phyBOARD Nunki, Mira or phyFLEX)
+- min. 1GB RAM
+
+
+Step 1)
+=======
+Depending on the kit versions, different phyCAM cameras can be connected to the various camera interfaces.
+In order for the camera to be recognized by the system, the camera must be registered in the bootloader.
+This entry is permanently stored in the bootloader environment.
+
+Depending on the kit version, please follow the "xxx_Getting_Started_xxx" instructions of the respective module / kit.
+You will find these instructions on our FTP server in the directory of the respective module:
+ftp://ftp.phytec.de/pub/ImageProcessing/
+
+Example: phyBOARD-Nunki i.MX6 PD18.1.0
+Path: ftp://ftp.phytec.de/pub/ImageProcessing/phyBOARD-Nunki-i.MX6_linux_PD18.1.x/Documentation/phyCAM_with_phyBOARD-Nunki-iMX6_Getting_Started_A0.pdf
+
+
+Step 2)
+=======
+The initialization as v4l2 device is done by the "medi-ctl" frame work.
+The calls can be made at the console level or from a separate C program.
+For the console-level call, you can use the supplied scripts:
+- init_bw_phyCAM_v4l_device.sh (monochrome camera)
+- init_col_phyCAM_v4l_device.sh (color camera)
+To do this, copy the two scripts into the directory "... / gstreamer-examples / ..."
+Change the file attributes:
+   * chmod 755 init_bw_phyCAM_v4l_device.sh
+   * chmod 755 init_col_phyCAM_v4l_device.sh
+
+Depending on whether you use a monochrome or color camera, you can now call the script.
+The script now sets the required parameters of the camera and outputs the ... / dev / video [x] device.
+With this you can now access the camera.
+As far as no change of the resolution or the data format is necessary, the call only takes place once at runtime.
+
+
+Step 3)
+==========
+The cameras also offer the possibility to set certain camera parameters (shutter, gain, BLC, ...).
+For this purpose, the "v4l2-ctl" frame work can be used.
+The call and the possible parameters are in the respective subdirectory
+  ... / gstreamer-examples / more_ [name of the camera sensor] _scripts to find
+
+Camera registers that are not yet shown in the driver can also be set by direct register access via i2c.
+An appropriate tool can be found in the directory ... / gstreamer-examples / tools / i2c

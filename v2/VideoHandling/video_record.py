@@ -85,6 +85,7 @@ class VideoRecorder:
         #print("h ", self.frame_height, " w ", self.frame_width)
         parentDir_path = os.path.dirname(os.path.realpath(__file__))
         recordsDir_path = os.path.join(parentDir_path, self.recordsDir_name)
+        print(recordsDir_path)
         if not os.path.exists(recordsDir_path):
             os.mkdir(recordsDir_path)
 

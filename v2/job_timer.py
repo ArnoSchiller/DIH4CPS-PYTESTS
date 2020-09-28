@@ -49,8 +49,8 @@ class JobTimer:
         self.duration_s = duration
 
         self.isRunning = True
-
-        threading.Timer(self.duration_s, self.process_job).start()
+        
+        self.process_job()
 
     def process_job(self):
         """

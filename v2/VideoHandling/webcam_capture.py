@@ -18,6 +18,7 @@ v0.x.x           see v1 (webcam_recorder) for more informations.    01-09-2020\n
 v1.0.0      (AS) First initialize. Added code from WebcamRecorder.  01-09-2020\n
                 This version does only saves video frames to ring             \n
                 buffer.                                                       \n
+v1.0.1      (AS) Adapted code to phyBoard Nunki. Testing process.   28-09-2020\n
 """
 import platform
 if platform.system() == 'Windows':
@@ -62,6 +63,8 @@ class WebcamCapture:
 
     def init_videoCapture(self):
         if platform.node() == 'phyboard-nunki-imx6-1':
+            os.system("chmod 777 init_col_phyCAM_v4l_device.sh")
+            os.system("./init_col_phyCAM_v4l_device.sh")
             self.capture = cv2.VideoCapture("/dev/video4", cv2.CAP_V4L2)    
             return
         self.capture = cv2.VideoCapture(self.connection_str)
@@ -72,13 +75,13 @@ class WebcamCapture:
         """
         self.mqtt_client.sendProcessMessage(self.device_name, 
                 self.mqtt_client.status_list["WebcamCapture"]["OpeningCamera"])
-        self.create_video_capture()
+        self.init_videoCapture()
 
         # try to connect to camera
         while not self.capture.isOpened():
             self.mqtt_client.sendProcessMessage(self.device_name, 
                 self.mqtt_client.status_list["WebcamCapture"]["OpeningCameraFailed"])
-            self.create_video_capture()
+            self.init_videoCapture()
 
         self.mqtt_client.sendProcessMessage(self.device_name, 
                 self.mqtt_client.status_list["WebcamCapture"]["OpenedCamera"])
@@ -86,13 +89,6 @@ class WebcamCapture:
         # update frame size
         self.frame_width = int(self.capture.get(3))
         self.frame_height = int(self.capture.get(4))
-    
-    def create_video_capture(self):
-        if platform.node == 'phyboard-nunki-imx6-1':
-            self.capture = cv2.VideoCapture(self.connection_str, cv2.CAP_V4L2)
-            return
-        self.capture = cv2.VideoCapture(self.connection_str)
-
 
 
     def capture_frames(self):

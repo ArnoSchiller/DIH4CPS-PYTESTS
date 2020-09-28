@@ -18,15 +18,11 @@ global_user_name                = "test1"
 global_with_video_display       = False
 global_use_light                = True
 
-# camera 
-if platform.node == 'phyboard-nunki-imx6-1':
-    global_camera_connection = "/dev/video4"
-else:
-    #global_camera_connection    = "rtsp://192.168.3.70:8554"
-    #global_camera_connection    = "rtsp://admin:admin@192.168.3.70:8554"
-    #global_camera_connection    = "rtsp://admin:admin@192.168.8.22:8554"
-    global_camera_connection     = "http://root:root@192.168.8.136/mjpg/1/video.mjpg"
-    #global_camera_connection    = "http://root:root@192.168.178.78/mjpg/1/video.mjpg"
+#global_camera_connection    = "rtsp://192.168.3.70:8554"
+#global_camera_connection    = "rtsp://admin:admin@192.168.3.70:8554"
+#global_camera_connection    = "rtsp://admin:admin@192.168.8.22:8554"
+global_camera_connection     = "http://root:root@192.168.8.136/mjpg/1/video.mjpg"
+#global_camera_connection    = "http://root:root@192.168.178.78/mjpg/1/video.mjpg"
 
 # Recorder 
 global_camera_fps               = 20

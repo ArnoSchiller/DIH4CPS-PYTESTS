@@ -17,7 +17,7 @@ v1.0.2      (AS) Tested the security camera. Works fine.            10-09-2020\n
 """
 
 import threading
-import cv2,imutils
+import cv2 #,imutils
 from VideoHandling.video_record import VideoRecorder
 from configuration import global_max_video_len_frames
 
@@ -41,7 +41,7 @@ class VideoProcessor:
 
     def process_video_data(self):
         print("Start")
-        self.security_cam()
+        #self.security_cam()
         """
         self.isRunning = True
         counter = 0
@@ -60,7 +60,7 @@ class VideoProcessor:
                 vr = VideoRecorder(buffer_dict)
             """
 
-    
+    """ 
     def security_cam(self):
         print("Start")
         firstFrame = None
@@ -129,16 +129,16 @@ class VideoProcessor:
                 print("reset")
 
             # Bilder anzeigen
-            """
+
             cv2.imshow("Security Feed", gray)
             cv2.imshow("Thresh", thresh)
             cv2.imshow("Frame Delta", frameDelta)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
-            #"""
                
         cv2.destroyAllWindows()
+    """
 
     def release(self):
         self.isRunning = False

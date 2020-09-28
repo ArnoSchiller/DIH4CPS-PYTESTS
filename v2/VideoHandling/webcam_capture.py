@@ -60,8 +60,11 @@ class WebcamCapture:
         # initialize video capture
         self.reconnect()
 
- 
-    
+    def init_videoCapture(self):
+        if platform.node() == 'phyboard-nunki-imx6-1':
+            self.capture = cv2.VideoCapture("/dev/video4", cv2.CAP_V4L2)    
+            return
+        self.capture = cv2.VideoCapture(self.connection_str)
 
     def reconnect(self):
         """
@@ -69,7 +72,7 @@ class WebcamCapture:
         """
         self.mqtt_client.sendProcessMessage(self.device_name, 
                 self.mqtt_client.status_list["WebcamCapture"]["OpeningCamera"])
-        self.capture = cv2.VideoCapture(self.connection_str)
+        self.init_videoCapture()
 
         # try to connect to camera
         while not self.capture.isOpened():

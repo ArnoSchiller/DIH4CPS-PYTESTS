@@ -8,7 +8,8 @@ cap = cv2.VideoCapture('v4l2src device=/dev/video4 !  video/x-bayer,format=grbg,
 
 cap = cv2.VideoCapture('/dev/video4', cv2.CAP_V4L2)
 
-if cap.isOpened():
+while cap.isOpened():
     ret, frame = cap.read()
+    cv2.imshow("frame", frame)
 
-cv2.imwrite("/root/files/test.jpg", frame)
+# cv2.imwrite("/root/files/test.jpg", frame)

@@ -40,7 +40,7 @@ class VideoProcessor:
         print("Prozessor erstellt")
 
     def process_video_data(self):
-        print("Start")
+        self.manually_recording()
         #self.security_cam()
         """
         self.isRunning = True
@@ -59,6 +59,42 @@ class VideoProcessor:
                 buffer_dict['timestamp'] = ""
                 vr = VideoRecorder(buffer_dict)
             """
+    def manually_recording(self):
+        print("Started manually recording.")
+        print("Press 'r' to start/stop recording or 'q' to quit.")
+
+        self.isRunning = True
+        recording = False
+        counter = 0
+        frames_list = []
+
+        while self.isRunning:
+            frame = self.ring_buffer.get_next_element()
+
+            cv2.imshow("video data", frame)
+            key = cv2.waitKey(1)
+
+            if key == 33:
+                return
+    
+            if key == 32:
+                # Aufnahme wird gestartet
+                if not recording and len(frames_list) == 0:
+                    print("start recording")
+                    prev_frames = self.ring_buffer.get_previous_elements(30)
+                    for p_frame in prev_frames:
+                        frames_list.append(p_frame)
+
+                # Aufnahme wird beendet
+                if recording and not frames_list == []:
+                    print("stop recording")
+                    vr = VideoRecorder(buffer=frames_list,video_name_addition="manual")
+                    frames_list.clear()
+
+            if recording:
+                frames_list.append(frame)
+        
+        self.release()
 
     """ 
     def security_cam(self):

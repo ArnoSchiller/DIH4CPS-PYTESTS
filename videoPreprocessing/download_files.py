@@ -1,7 +1,7 @@
 import boto3
 import os
 
-date_str = "2020-10-01"
+date_str = "2020-10-06"
 download_dir = os.path.join(os.path.abspath("./video_files"), date_str)
 if not os.path.exists(download_dir):
     os.mkdir(download_dir)

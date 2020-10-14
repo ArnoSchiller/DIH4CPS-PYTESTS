@@ -9,21 +9,32 @@ import time
 class VideoAnalyser():
     capture = None
     update_needed = False
-    border_contourArea = 1000
+    border_contourArea = 1500
     count = 0 
     def __init__(self):
         cur_dir = "C:/Users/swms-hit/Schiller/DIH4CPS-PYTESTS/videoPreprocessing"
-        filter_str = "*.avi"
-        filter_path = os.path.join(cur_dir,"video_files/2020-10-01", filter_str)
-        self.file_paths = glob.glob(filter_path)
+
         self.first_frame = None
+        noise_dir = os.path.join(cur_dir,"noise")
+        noise_filter_path = os.path.join(noise_dir, "*.png")
+        noise_paths = glob.glob(noise_filter_path)
+        for path in noise_paths:
+            img = cv2.cvtColor(cv2.imread(path), cv2.COLOR_BGR2GRAY)
+            if self.first_frame is None:
+                self.first_frame = img
+            else:
+                cv2.addWeighted(self.first_frame, 0.3, img, 0,7, 0.0)
+        #self.first_frame = self.first_frame / len(noise_paths)
+        filter_str = "*.avi"
+        filter_path = os.path.join(cur_dir,"video_files/2020-10-06", filter_str)
+        self.file_paths = glob.glob(filter_path)
         self.video_index = 0
         self.change_capture()
 
         if self.capture is None: quit()
 
         # create subplot grid
-        self.num_cols = 3
+        self.num_cols = 4
         self.num_rows = 1
         self.grid_list = []
         for i in range(self.num_cols * self.num_rows):
@@ -32,17 +43,18 @@ class VideoAnalyser():
 
         #create two image plots
         self.image_list = []
-        first_capture, _ = self.convert_frame()
-        self.first_frame = first_capture[0]
-        self.current_frame = self.first_frame  
+        first_capture, _ = self.convert_frame(first_frame=self.first_frame)
+        #self.first_frame = first_capture[0]
+        #self.current_frame = self.first_frame  
         self.image_list.append(self.grid_list[0].imshow(first_capture[0]))
         self.image_list.append(self.grid_list[1].imshow(first_capture[1], cmap="gray"))
         self.image_list.append(self.grid_list[2].imshow(first_capture[2], cmap="gray"))
+        self.image_list.append(self.grid_list[3].imshow(first_capture[3], cmap="gray"))
 
         
         #threading.Thread(target=self.read_input).start()
 
-        ani = FuncAnimation(plt.gcf(), self.update, interval=1000)
+        ani = FuncAnimation(plt.gcf(), self.update, interval=10)
         plt.show()
     
     def change_capture(self):
@@ -70,11 +82,9 @@ class VideoAnalyser():
         while not detected:
             self.count += 1
             frame = self.grab_frame()
-            #if not first_frame is None: 
-            #    frame = frame - first_frame
             if frame is None:
                 continue
-            images, contours = self.getIntenseContours(frame)
+            images, contours = self.getIntenseContours(frame, first_frame)
             if len(contours) > 0:
                 #print(self.count)
                 detected = True
@@ -126,9 +136,15 @@ class VideoAnalyser():
             #self.update_needed = False
 
     
-    def getIntenseContours(self, frame):
+    def getIntenseContours(self, frame, first_frame=None):
         rgb_frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
         gray_image = cv2.cvtColor(rgb_frame, cv2.COLOR_RGB2GRAY)
+
+        gray_image_sub = gray_image
+        if not first_frame is None: 
+        #first_frame = cv2.cvtColor(first_frame, cv2.COLOR_BGR2GRAY)
+            cv2.subtract(gray_image_sub, first_frame)
+        
         #if not self.first_frame is None:
         #    gray_first = cv2.cvtColor(self.first_frame, cv2.COLOR_RGB2GRAY)
         #    gray_image = gray_image - gray_first
@@ -159,7 +175,7 @@ class VideoAnalyser():
                 grid_list[3].add_patch(rect)
                 """
                 filtered_contours.append(c)
-        return [frame, gray_image, thresh_image], filtered_contours
+        return [frame, gray_image, first_frame, thresh_image], filtered_contours
 
     def save_image(self, frame, video_file_path, index):
         frame = cv2. cvtColor(frame, cv2.COLOR_RGB2BGR)

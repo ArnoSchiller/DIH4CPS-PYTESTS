@@ -30,10 +30,13 @@ global_camera_connection     = 0 # "http://root:root@192.168.8.136/mjpg/1/video.
 global_camera_fps               = 20
 global_recordsDir_name          = "Recordings"
 global_recordsDir_path          = os.path.join("..", global_recordsDir_name)         
+
 global_record_frequency_s       = 10 * 60           # 10 minutes
-global_record_video_length_s    = 10   
+global_record_video_length_s    = 10    
 global_max_video_len_seconds    = 20
 global_max_video_len_frames     = global_max_video_len_seconds * global_camera_fps
+
+global_direct_record_length_s   = 60 * 60       # 1 hour
 
 # Cloud 
 global_cloud_access_key         = "minio"

@@ -91,7 +91,7 @@ class DataAcquisition:
                                     duration=global_record_frequency_s)
         
         if self.with_direct_rec:
-            direct_record_video(self.ring_buffer, length_seconds=60*60)
+            direct_record_video(self.ring_buffer, length_seconds=global_direct_record_length_s)
     
     def check_process_status(self):
         if not self.video_capture_thread.is_alive():

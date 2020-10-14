@@ -13,12 +13,11 @@ from VideoHandling.ring_buffer import RingBuffer
 from VideoHandling.webcam_capture import WebcamCapture
 from VideoHandling.video_display import VideoDisplay
 from VideoHandling.video_process import VideoProcessor
+from VideoHandling.video_record import direct_record_video
 
 from job_timer import JobTimer
 
-from configuration import global_record_frequency_s
-from configuration import global_record_video_length_s
-from configuration import global_with_video_display
+from configuration import *
 
 class DataAcquisition:
     """ 
@@ -47,7 +46,10 @@ class DataAcquisition:
         object to reciev and handle internal messages (job exchange)
     """
 
-    with_display = global_with_video_display
+    with_display    = global_with_video_display
+    with_process    = global_with_video_process
+    with_direct_rec = global_with_direct_rec
+    with_job_timer  = global_with_job_timer
 
     video_capture_object = None
     video_capture_thread = None
@@ -71,10 +73,11 @@ class DataAcquisition:
                             self.video_capture_object.capture_frames)
         self.video_capture_thread.start()
         
-        self.video_process_object = VideoProcessor(self.ring_buffer)
-        self.video_processor_thread = threading.Thread(target=
+        if self.with_process:
+            self.video_process_object = VideoProcessor(self.ring_buffer)
+            self.video_processor_thread = threading.Thread(target=
                             self.video_process_object.process_video_data)
-        self.video_processor_thread.start()
+            self.video_processor_thread.start()
         
         if self.with_display:
             self.video_display_object = VideoDisplay(self.ring_buffer)
@@ -82,10 +85,13 @@ class DataAcquisition:
                                 self.video_display_object.display_frames)
             self.video_display_thread.start()
 
-        self.job_timer_object = JobTimer(ring_buffer=self.ring_buffer,
+        if self.with_job_timer:    
+            self.job_timer_object = JobTimer(ring_buffer=self.ring_buffer,
                                     video_length=global_record_video_length_s,
                                     duration=global_record_frequency_s)
-
+        
+        if self.with_direct_rec:
+            direct_record_video(self.ring_buffer, length_seconds=global_direct_record_length_s)
     
     def check_process_status(self):
         if not self.video_capture_thread.is_alive():

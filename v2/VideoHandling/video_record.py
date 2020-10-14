@@ -61,9 +61,8 @@ class VideoRecorder:
         setup the video writer and start a thread writing the given frames to 
         file. 
         """
-        if buffer == None:
-            return
-
+        self.frames_buffer = buffer
+        
         self.direct_upload = direct_upload
 
         self.video_name_addition = video_name_addition
@@ -73,14 +72,12 @@ class VideoRecorder:
         else:
             self.video_timestamp = timestamp
 
-        if not buffer == None:
-            # self.frames_buffer = np.copy(buffer)
-            self.frames_buffer = buffer
-            self.video_timestamp = datetime.datetime.now()
-
         self.mqtt_client = MQTTConnection()
 
-        (self.frame_height, self.frame_width, _) = self.frames_buffer[0].shape
+        if self.frames_buffer is None:
+            self.frame_height, self.frame_width = 480, 640
+        else:
+            (self.frame_height, self.frame_width, _) = self.frames_buffer[0].shape
         
         #print("h ", self.frame_height, " w ", self.frame_width)
         parentDir_path = os.path.dirname(os.path.realpath(__file__))
@@ -104,9 +101,12 @@ class VideoRecorder:
         
         self.mqtt_client.sendProcessMessage(self.device_name, 
                 self.mqtt_client.status_list["VideoRecorder"]["OpenedWriter"])
-                
-        th = threading.Thread(target=self.write_frames_to_file)
-        th.start()
+
+        if not self.frames_buffer == None:
+            self.video_timestamp = datetime.datetime.now()        
+            
+            th = threading.Thread(target=self.write_frames_to_file)
+            th.start()
 
     def generate_filename(self, used_datetime=datetime.datetime.now()):
         """
@@ -123,6 +123,12 @@ class VideoRecorder:
                                         used_datetime.minute,
                                         used_datetime.second)
         return filename
+
+    def write_frame(self, frame):
+        """
+        Writes one frame to video file.
+        """
+        self.writer.write(frame)
 
     def write_frames_to_file(self):
         """
@@ -179,6 +185,31 @@ def record_video(ring_buffer, length_seconds=None, length_frames=None):
 
     VideoRecorder(buffer=frames_list, timestamp=video_timestamp, video_name_addition="cronjob")
 
+def direct_record_video(ring_buffer, length_seconds=None, length_frames=None):
+    """
+    Function to record a video with a specific length. The frame will be saved directly to the file instead of saving it into a array.
+    """
+    if not length_seconds == None:
+        length_frames = global_camera_fps * length_seconds
+
+    if length_frames == None:
+        return
+
+    print("Recording video with ", length_frames, " frames (directly)")
+
+    counter = 0
+    video_timestamp = datetime.datetime.now()
+
+    vr = VideoRecorder(buffer=None, timestamp=video_timestamp, video_name_addition="directRecord")
+
+    while counter < length_frames:
+        frame = ring_buffer.get_next_element()[1]
+        if frame is None:
+            continue
+        vr.write_frame(cv2.resize(frame, (vr.frame_width,vr.frame_height)))
+        counter += 1
+
+    vr.release()
     
 
 if __name__ == "__main__":

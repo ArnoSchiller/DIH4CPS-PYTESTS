@@ -6,15 +6,20 @@ import os, glob
 import cv2
 import time
 
+from trained_model import Model
+
 class VideoAnalyser():
     capture = None
     update_needed = False
     border_contourArea = 1000
     count = 0 
     def __init__(self):
-        cur_dir = "C:/Users/swms-hit/Schiller/DIH4CPS-PYTESTS/videoPreprocessing"
+
+        self.shrimp_model = Model()
+
+        cur_dir = os.path.dirname(__file__)
         filter_str = "*.avi"
-        filter_path = os.path.join(cur_dir,"video_files/2020-10-01", filter_str)
+        filter_path = os.path.join(cur_dir,"video_files", filter_str)
         self.file_paths = glob.glob(filter_path)
         self.first_frame = None
         self.video_index = 0
@@ -22,6 +27,17 @@ class VideoAnalyser():
 
         if self.capture is None: quit()
 
+        while self.capture.isOpened():
+            ret, image = self.capture.read()
+            if ret:
+                num_shrimp, image_pred = self.shrimp_model.predict(image)
+                """
+                cv2.imshow("predimg", image_pred)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    cv2.destroyAllWindows()  
+                """
+                #print(num_shrimp)
+        """
         # create subplot grid
         self.num_cols = 3
         self.num_rows = 1
@@ -44,6 +60,7 @@ class VideoAnalyser():
 
         ani = FuncAnimation(plt.gcf(), self.update, interval=1000)
         plt.show()
+        """
     
     def change_capture(self):
         print("reset")

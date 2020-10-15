@@ -9,6 +9,7 @@ WebcamRecorder: This file includes every configuration with global usage.
 VERSION HISTORY
 Version:    (Author) Description:                                   Date:
 v0.0.1      (AS) First initialize. Added important configurations.  10.08.2020\n
+v0.0.2      (AS) Added configurations for data_acquisition.         14.10.2020\n
 """
 
 import os

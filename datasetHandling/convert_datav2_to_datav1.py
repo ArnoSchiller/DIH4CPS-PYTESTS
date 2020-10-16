@@ -5,7 +5,6 @@ Make sure you have installed the following packages:
     - pip install beautifulsoup4
 """
 
-# from bs4 import BeautifulSoup 
 import os
 import glob
 import boto3 
@@ -15,6 +14,9 @@ from xml.etree.ElementTree import Element, SubElement
 from lxml import etree
 import codecs
 
+from dataset_handler import DatasetHandler 
+from dataset_handler import ACCESS_KEY, SECRET_KEY, CLOUD_URL
+
 FILE_NAME_ADDITION = ""
 
 class CloudFilesConverter:
@@ -23,10 +25,11 @@ class CloudFilesConverter:
     cloud_access_key         = "minio"
     cloud_secret_key         = "miniostorage"
     cloud_url                = "https://minio.dih4cps.swms-cloud.com:9000/"
-    data_v1_bucket_name      = "dataset-v1-dih4cps"
-    data_v2_bucket_name      = "dataset-v2-dih4cps"
 
     def __init__(self):
+
+        self.dataset_handler = DatasetHandler()
+
         self.cvt = Converter()
         
         self.s3_client = boto3.client('s3',
@@ -42,6 +45,9 @@ class CloudFilesConverter:
                         endpoint_url=self.cloud_url, 
                         verify=False,
                         config=boto3.session.Config(signature_version='s3v4'))
+
+        self.data_v1_bucket_name = self.dataset_handler.bucket_names[0]
+        self.data_v2_bucket_name = self.dataset_handler.bucket_names[1]
 
         self.s3_bucket_v1 = self.s3_resource.Bucket(self.data_v1_bucket_name)
         self.s3_bucket_v2 = self.s3_resource.Bucket(self.data_v2_bucket_name)
@@ -76,37 +82,18 @@ class CloudFilesConverter:
                 os.remove(new_local_file_path)
             
 
-
-    def get_complete_dataset_list(self, bucket):
-        dataset_files = []
-        xml_file_names = []
-        for bucket_object in bucket.objects.all():
-            object_name = str(bucket_object.key)
-            if object_name.count("xml") > 0:
-                filepath = object_name.split(".")[0]
-                filename = filepath.split("/")[1]
-                xml_file_names.append(filename)
-                
-        for bucket_object in bucket.objects.all():
-            object_name = str(bucket_object.key)
-            if object_name.count("png") > 0:
-                filepath = object_name.split(".")[0]
-                filename = filepath.split("/")[1]
-                if xml_file_names.count(filename) > 0:
-                    dataset_files.append(filename)
-        return dataset_files
-
     def get_data_to_convert(self):
-        dataset_v2_files = self.get_complete_dataset_list(self.s3_bucket_v2)
-        dataset_v1_files = self.get_complete_dataset_list(self.s3_bucket_v1)
+        dataset_v2_files = self.dataset_handler.get_complete_dataset_list(self.data_v2_bucket_name)
+        dataset_v1_files = self.dataset_handler.get_complete_dataset_list(self.data_v1_bucket_name)
+
+        print("v2: ", len(dataset_v2_files))
+        print("v1: ", len(dataset_v1_files))
 
         files_to_convert = []
         for filename in dataset_v2_files:
             if not dataset_v1_files.count(filename + FILE_NAME_ADDITION) > 0:
                 files_to_convert.append(filename)
 
-        print("v2: ", len(dataset_v2_files))
-        print("v1: ", len(dataset_v1_files))
         print("converts: ", len(files_to_convert))
 
         return files_to_convert
@@ -125,9 +112,8 @@ class Converter:
         changes every xml file in directory.
         """
         for file_path in self.file_paths:
-            """ using ElementTree """
             self.change_single_xml(file_path)
-            #"""
+            
 
     def change_single_xml(self, path):
         if not FILE_NAME_ADDITION == "" and path.count(FILE_NAME_ADDITION+".xml") > 0:

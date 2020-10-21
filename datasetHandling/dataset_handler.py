@@ -15,6 +15,7 @@ class DatasetHandler:
     cloud_url                = CLOUD_URL
 
     bucket_names = ["dataset-v1-dih4cps", "dataset-v2-dih4cps"]
+    video_bucket_name = "test-dih4cps"
 
     def __init__(self):
         self.s3_client = boto3.client('s3',
@@ -76,7 +77,18 @@ class DatasetHandler:
             self.s3_client.download_file(bucket_name, image_file_path, local_file_path)
             
 
-
+    def get_all_video_names(self, filter_str=""):
+        video_file_names = []
+        bucket = self.s3_resource.Bucket(self.video_bucket_name)
+        for bucket_object in bucket.objects.all():
+            object_name = str(bucket_object.key)
+            if object_name.count(".avi")>0 and object_name.count(filter_str)>0:
+                if object_name.count("/") > 0:
+                    object_name = object_name.split("/")[-1]
+                filename = object_name.split(".")[0]
+                
+                video_file_names.append(filename)
+        return video_file_names
 
     def get_all_image_names(self, bucket_name):
 

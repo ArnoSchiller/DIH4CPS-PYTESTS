@@ -58,6 +58,13 @@ class DatasetHandler:
                     dataset_files.append(filename)
         return dataset_files
 
+    def download_video(self, object_name, download_path, bucket_name=None):
+
+        if bucket_name is None:
+            bucket_name = self.video_bucket_name
+
+        self.s3_client.download_file(bucket_name, object_name, download_path)
+
     def download_not_labeled_images(self, bucket_name=None):
         
         if bucket_name is None:
@@ -77,27 +84,18 @@ class DatasetHandler:
             self.s3_client.download_file(bucket_name, image_file_path, local_file_path)
             
 
-    def get_all_video_names(self, bucket_name=video_bucket_name, filter_str=""):
-        
+    def get_all_video_names(self, filter_str=""):
         video_file_names = []
-
-        bucket = self.s3_resource.Bucket(bucket_name)
+        bucket = self.s3_resource.Bucket(self.video_bucket_name)
         for bucket_object in bucket.objects.all():
             object_name = str(bucket_object.key)
-            if object_name.count("avi") > 0:
-                filepath = object_name.split(".")[0]
-                if filepath.count("/") > 0:
-                    filepath = filepath.split("/")[-1]
-                filename = filepath
-
-                if not filter_str == "":
-                    if filename.count(filter_str):
-                        video_file_names.append(filename)
-                else:
-                    video_file_names.append(filename)
-
+            if object_name.count(".avi")>0 and object_name.count(filter_str)>0:
+                if object_name.count("/") > 0:
+                    object_name = object_name.split("/")[-1]
+                filename = object_name.split(".")[0]
+                
+                video_file_names.append(filename)
         return video_file_names
-
 
     def get_all_image_names(self, bucket_name):
 

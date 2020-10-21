@@ -6,7 +6,10 @@ import os, glob
 import cv2
 import time
 
-from trained_model import Model
+import sys
+sys.path.append(os.path.abspath(".."))
+sys.path.append(os.path.abspath("../models"))
+from models.trained_model import Model
 
 class VideoAnalyser():
     capture = None

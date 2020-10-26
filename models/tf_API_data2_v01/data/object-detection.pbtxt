@@ -1,0 +1,51 @@
+item{
+	id: 1
+	name:'shrimp_head_near'
+}
+item{
+	id: 2
+	name:'shrimp_head_middle'
+}
+item{
+	id: 3
+	name:'shrimp_head_far'
+}
+
+item{
+	id: 4
+	name:'shrimp_tail_near'
+}
+item{
+	id: 5
+	name:'shrimp_tail_middle'
+}
+item{
+	id: 6
+	name:'shrimp_full_far'
+}
+
+item{
+	id: 7
+	name:'shrimp_full_near'
+}
+item{
+	id: 8
+	name:'shrimp_full_middle'
+}
+item{
+	id: 9
+	name:'shrimp_tail_far'
+}
+
+item{
+	id: 10
+	name:'shrimp_part_near'
+}
+item{
+	id: 11
+	name:'shrimp_part_middle'
+}
+item{
+	id: 12
+	name:'shrimp_part_far'
+}

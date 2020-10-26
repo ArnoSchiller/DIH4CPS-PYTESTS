@@ -32,6 +32,28 @@ class DatasetHandler:
                         verify=False,
                         config=boto3.session.Config(signature_version='s3v4'))
     
+    def define_dataset_version(self, bucket_name, version_id):
+        if not self.bucket_names.count(bucket_name) > 0:
+            return
+        version_file_name = "version_{}.txt".format(version_id)
+        bucket = self.s3_resource.Bucket(bucket_name)
+        
+        for bucket_object in bucket.objects.all():
+            object_name = str(bucket_object.key)
+            if object_name.count(version_file_name) > 0:
+                print("Version ", version_id, " allready exists.")
+                return
+        
+        all_images = self.get_all_image_names(bucket_name)
+
+        with open(version_file_name, "w") as out_file:
+            for image_name in all_images:
+                out_file.write(image_name + "\n")
+
+        self.s3_client.upload_file(version_file_name, bucket_name, version_file_name)
+
+        os.remove(version_file_name)
+    
     def get_complete_dataset_list(self, bucket_name):
 
         if not self.bucket_names.count(bucket_name) > 0:
@@ -82,7 +104,28 @@ class DatasetHandler:
             image_file_path = "images/" + image_name + ".png"
             local_file_path = os.path.join(self.download_dir, image_name + ".png")
             self.s3_client.download_file(bucket_name, image_file_path, local_file_path)
-            
+
+    def load_dataset_version(self, bucket_name, version_name=None):
+        
+        images = []
+
+        if version_name is None:
+            version = self.get_latest_dataset_version(bucket_name)
+        else:
+            version = version_name + ".txt"
+        
+        self.s3_client.download_file(bucket_name, version, version)
+
+        with open(version, "r") as in_file:
+            for image_name in in_file:
+                if image_name.count("\n"):
+                    image_name = image_name.split("\n")[0]
+                images.append(image_name)
+
+        return images 
+
+    def get_latest_dataset_version(self, bucket_name):
+        return "version_2020-10-15.txt"
 
     def get_all_video_names(self, filter_str=""):
         video_file_names = []
@@ -131,4 +174,10 @@ class DatasetHandler:
 
 if __name__ == "__main__":
     dsh = DatasetHandler()
-    dsh.download_not_labeled_images()
+
+    ## define dataset version, write every used image into txt
+    #dsh.define_dataset_version(dsh.bucket_names[1], "2020-10-15")
+    
+    ## load latest dataset as list 
+    #image_list = dsh.load_dataset_version(dsh.bucket_names[1])
+    #print(image_list)

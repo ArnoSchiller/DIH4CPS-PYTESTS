@@ -15,6 +15,8 @@ v0.0.1           See v1 (mqtt_connection) for more.    	            07.08.2020\n
 v1.0.0      (AS) Updated to version 2.                              07.09.2020\n
 v1.0.1      (AS) Updated code in case there is no internet          07.09.2020\n
                 connction by using try and except.                            \n
+v1.1.0      (AS) Included functions to send shrimp detections via   21.10.2020\n
+                MQTT. Sending the number of shrimps for each frame.           \n
 
 Attributes:
 -----------
@@ -52,14 +54,14 @@ class MQTTConnection:
     """
     # SSL/TLS1.2 aktivieren. Pub auf den Topic IOT/{irgendwas}
     
-    mqtt_host = global_mqtt_host
-    user_name = global_mqtt_user_name
-    password = global_mqtt_password
+    mqtt_host   = global_mqtt_host
+    user_name   = global_mqtt_user_name
+    password    = global_mqtt_password
 
-    port = global_mqtt_port
-    keepalive = 60
+    port        = global_mqtt_port
+    keepalive   = 60
 
-    local_mqtt = global_mqtt_usinglocalhost
+    local_mqtt  = global_mqtt_usinglocalhost
 
     topic = "IOT/test"
 
@@ -152,6 +154,54 @@ class MQTTConnection:
         print(msg)
         res = self.sendMessage(msg)
 
+    def sendDetectionMessage(self,  user, 
+                                    process_version, 
+                                    model_name,
+                                    score_min_thresh,
+                                    process_timestamp,
+                                    file_name,
+                                    num_shrimps,
+                                    frame_timestamp,
+                                    **options):
+        """
+        Sending the detected number of shrimps via MQTT.
+
+        Influx string syntax like:
+        shrimp,user={u},modul=VideoProcessing,process=ProcessPreviousVideos, version={v},modelName={m}, scoreMinThresh={s}, processTimestamp={p},filename={f} numShrimps={n} timestamp
+        """
+        msg = "shrimp,user={},".format(user)
+        msg += "modul=VideoProcessing,process=ProcessPreviousVideos,"
+        msg += "version={},".format(process_version)
+        msg += "modelName={},".format(model_name)
+        msg += "scoreMinThresh={},".format(score_min_thresh)
+        msg += "processTimestamp={},".format(process_timestamp)
+        msg += "filename={} ".format(file_name)
+        msg += "numShrimps={} ".format(num_shrimps)
+        msg += self.get_influx_timestamp(ts_str=frame_timestamp)
+        print(msg)
+        res = self.sendMessage(msg)
+        print(res)
+
+    def get_influx_timestamp(self, ts_str):
+        
+        print(ts_str)
+        [ts_date, ts_time] = ts_str.split("_")
+        ts_date = ts_date.split("-")
+        ts_time = ts_time.split("-")
+
+        ts = datetime.datetime(int(ts_date[0]), int(ts_date[1]),int(ts_date[2]), int(ts_time[0]),int(ts_time[1]),int(ts_time[2]),int(ts_time[3])*1000)
+
+        # 1677-09-21T00:12:43.145224194Z
+        base_ts = datetime.datetime(1677, 9, 21, 0, 12, 43, 145224)
+        base_ns = -9223372036854775806
+
+        delta_ts = ts - base_ts
+        delta_ns = delta_ts.total_seconds()*1000000000
+        
+        ts_ns = base_ns + delta_ns
+
+        return "{:.0f}".format(ts_ns)
+
     def sendMessage(self, message):
         return self.client.publish("IOT/test", message)
         """
@@ -183,5 +233,8 @@ def on_message(client, userdata, msg):
 
 if __name__ == '__main__':
     conn = MQTTConnection()
+    print(conn.get_influx_timestamp("2020-10-19_20-30-45-250"))
+    print(time.time_ns())
+    
     #conn.testloop()
-    conn.sendMessage("temperature,location=CPU,modul=SystemMonitoring,user=test1 temperature=20")
+    #conn.sendMessage("temperature,location=CPU,modul=SystemMonitoring,user=test1 temperature=20")

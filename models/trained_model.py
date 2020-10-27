@@ -1,7 +1,7 @@
 import numpy as np
 import os, sys
-import tensorflow as tf
 import cv2
+import tensorflow as tf
 from datetime import datetime, timedelta
 
 from collections import defaultdict

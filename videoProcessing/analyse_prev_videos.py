@@ -42,7 +42,8 @@ class VideoAnalyser:
 
     model_min_score_thresh = 0.6
 
-    with_mqtt = False
+    with_mqtt = True
+    with_visualisation = False
     save_detected_frames = True
 
 
@@ -55,7 +56,7 @@ class VideoAnalyser:
             print("choose a valid model or adapt models_list.")
             quit()
 
-        self.model = Model(model_name=model_name, save_detected_frames=True)
+        self.model = Model(model_name=model_name, save_detected_frames=self.save_detected_frames, with_visualisation=self.with_visualisation)
         self.model.min_score_thresh = self.model_min_score_thresh
 
         self.data_handler = DatasetHandler()

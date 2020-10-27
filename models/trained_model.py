@@ -10,12 +10,13 @@ from matplotlib import pyplot as plt
 from PIL import Image
 
 file_dir_path = os.path.dirname(__file__)
+"""
 if not os.path.exists(os.path.join(file_dir_path, "utils")):
     print("could not find utils.")
     quit()
-    
-from utils import label_map_util
-from utils import visualization_utils as vis_util
+""" 
+from object_detection.utils import label_map_util
+from object_detection.utils import visualization_utils as vis_util
 
 
 class Model:
@@ -44,8 +45,6 @@ class Model:
     num_classes = 12
     min_score_thresh = 0.5
 
-    with_visualisation = True
-
     fps = 20
     delta_ms = 1 / fps * 1000
     print(delta_ms)
@@ -53,9 +52,11 @@ class Model:
     image_dir = "images_detected"
 
     def __init__(self,  save_detected_frames=False, 
-                        model_name="tf_API_data2_v01"):
+                        model_name="tf_API_data2_v01", 
+                        with_visualisation=True):
 
         self.save_detected_frames = save_detected_frames
+        self.with_visualisation = with_visualisation
         self.model_name = model_name
         
         model_path = os.path.join(file_dir_path, model_name)
@@ -91,7 +92,7 @@ class Model:
                 os.mkdir(self.image_dir)
 
 
-    def predict(self, frame, frame_output_name="frame.png"):
+    def predict(self, frame):
         image_np = frame
         res_num_detected = 0
         res_boundingBoxes = [] 
@@ -140,10 +141,6 @@ class Model:
                         res_boundingBoxes.append(box)
                         res_scores.append(scores[i])
 
-                if self.save_detected_frames and res_num_detected > 0:
-                    print(frame_output_name)
-                    cv2.imwrite(os.path.join(self.image_dir, frame_output_name + ".png"), image_np)
-
         return  res_num_detected, res_boundingBoxes, res_scores
 
     def analyse_video(self, file_path): 
@@ -171,6 +168,7 @@ class Model:
         counter = 0 
         while video_capture.isOpened():
             ret, frame = video_capture.read()
+            output_frame = np.copy(frame)
             counter += 1
             if ret:
                 
@@ -184,14 +182,16 @@ class Model:
                 timestamp = timestamp + timedelta(microseconds=self.delta_ms * 1000)
                 
                 frame_name = video_name + "_{}".format(counter)
-                frame_shrimps, frame_bb, frame_scores = self.predict(frame, frame_output_name=frame_name)
+                frame_shrimps, frame_bb, frame_scores = self.predict(frame)
 
                 time_stamps.append(timestamp_str)
                 num_shrimps.append(frame_shrimps)
                 boundingBoxes.append(np.squeeze(frame_bb).tolist())
                 scores.append(frame_scores)
 
-            
+                if self.save_detected_frames and frame_shrimps > 0:
+                    cv2.imwrite(os.path.join(self.image_dir, frame_name + ".png"), output_frame)
+
             else:
                 break
 

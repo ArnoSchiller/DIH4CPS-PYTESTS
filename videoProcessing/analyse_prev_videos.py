@@ -38,7 +38,7 @@ class VideoAnalyser:
     models_list = [ "tf_API_data1_v01",
                     "tf_API_data2_v01"]
 
-    date_list = [   "2020-10-07"]
+    date_list = [   "2020-10-08"]
 
     model_min_score_thresh = 0.6
 
@@ -80,9 +80,9 @@ class VideoAnalyser:
 
             video_files = self.data_handler.get_all_video_names(filter_str=date_str)
 
-            for video_name in video_files:
+            for index, video_name in enumerate(video_files):
                 
-                print("\n\nprocessing video {} ...".format(video_name))
+                print("\n Processing video {} ({} / {})...".format(video_name, index, len(video_files)))
                 # download video 
                 video = video_name + ".avi"
                 local_path = os.path.abspath("./"+video)

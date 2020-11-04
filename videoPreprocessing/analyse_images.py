@@ -9,7 +9,8 @@ class ImageAnalyser:
     def __init__(self):
         #cur_dir = os.path.abspath("C:/Users/swms-hit/Schiller/DIH4CPS-PYTESTS/videoPreprocessing/video_files")
         #image_path = os.path.join(cur_dir, os.path.abspath("2020-09-30/Images/test1_cronjob_2020-09-30_14-33-43_169.png"))
-        image_path = os.path.abspath("C:/Users/swms-hit/Schiller/DIH4CPS-PYTESTS/videoPreprocessing/video_files/2020-09-30/Images/test1_cronjob_2020-09-30_14-33-43_170.png")
+        image_path = os.path.abspath("C:/Users/Schiller/ObjectDetection/datasets/test1_cronjob_2020-09-30_14-30-28_17.png")
+        #image_path = os.path.abspath("C:/Users/swms-hit/Schiller/DIH4CPS-PYTESTS/videoPreprocessing/video_files/2020-09-30/Images/test1_cronjob_2020-09-30_14-33-43_170.png")
         
         self.image = cv2.imread(image_path)
         print(self.image.shape)

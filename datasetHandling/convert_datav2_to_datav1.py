@@ -56,6 +56,7 @@ class CloudFilesConverter:
         files_list = self.get_data_to_convert()
         
         for file_name in files_list:
+            
             xml_file_path = "labels/" + file_name + ".xml"
             png_file_path = "images/" + file_name + ".png"
             

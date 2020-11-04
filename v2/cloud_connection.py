@@ -3,9 +3,10 @@ CloudConnection: This class rules the cloud connection (S3 architecture) using
     boto3.
 
 Requirements:                    
-pip install boto3, see https://pypi.org/project/boto3/ for more informations.
-also see https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-uploading-files.html.
-
+- pip install boto3, see https://pypi.org/project/boto3/ for more informations.
+    also see https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-uploading-files.html.
+  Version 1.10.25
+  
 @authors:   Arno Schiller (AS)
 @email:     schiller@swms.de
 @version:   v1.0.1

@@ -7,7 +7,13 @@ setup(
     name='dih4cps',
     version='0.0.1',
     description='Including AI underwater shrimp detection with IoT connection for smart aquacultures.',
-    py_modules=["helloworld"],
+    py_modules=[
+        "ring_buffer",
+        "webcam_capture",
+        "configuration", 
+        "mqtt_connection",
+        "helloworld", 
+    ],
     package_dir={'': 'src'},
 
     classifiers=[
@@ -22,6 +28,8 @@ setup(
 
     install_requires = [
         "tensorflow ~= 1.15",
+        "paho-mqtt ~= 1.4",
+        "opencv-python ~= 3.4",
     ],
 
     extras_reqire = {

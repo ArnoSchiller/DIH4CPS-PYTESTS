@@ -2,3 +2,17 @@
 .venv/
 
 .vscode/
+
+models/utils/__pycache__/
+
+v2/__pycache__/
+
+videoPreprocessing/__pycache__/
+
+v3/build/
+
+v3/dist/
+
+v3/src/__pycache__/
+
+v3/src/dih4cps.egg-info/

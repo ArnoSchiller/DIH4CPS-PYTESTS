@@ -177,41 +177,49 @@ class MQTTConnection:
                                     process_version, 
                                     model_name,
                                     score_min_thresh,
-                                    process_timestamp,
-                                    file_name,
-                                    num_shrimps,
                                     frame_timestamp,
-                                    **options):
+                                    num_shrimps,
+                                    boxes=None,
+                                    scores=None,
+                                    process_timestamp=None,
+                                    file_name=None):
         """
         Sending the detected number of shrimps via MQTT.
 
         Influx string syntax like:
-        shrimp,user={u},modul=VideoProcessing,process=ProcessPreviousVideos, version={v},modelName={m}, scoreMinThresh={s}, processTimestamp={p},filename={f} numShrimps={n} timestamp
+        shrimp,user={u},modul=VideoProcessing,process=ProcessPreviousVideos, version={v},modelName={m}, scoreMinThresh={s}[, processTimestamp={p},filename={f},boxes={b},scores{c}] numShrimps={n} timestamp
         """
-        msg = "shrimp,user={},".format(user)
-        msg += "modul=VideoProcessing,process=ProcessPreviousVideos,"
-        msg += "version={},".format(process_version)
-        msg += "modelName={},".format(model_name)
-        msg += "scoreMinThresh={},".format(score_min_thresh)
-        msg += "processTimestamp={},".format(process_timestamp)
-        msg += "filename={} ".format(file_name)
-        msg += "numShrimps={} ".format(num_shrimps)
-        msg += self.get_influx_timestamp(ts_str=frame_timestamp)
+        msg = "shrimp,user={}".format(user)
+        msg += ",modul=VideoProcessing,process=ProcessPreviousVideos"
+        msg += ",version={}".format(process_version)
+        msg += ",modelName={}".format(model_name)
+        msg += ",scoreMinThresh={}".format(score_min_thresh)
+        if not process_timestamp is None:
+            msg += ",processTimestamp={}".format(process_timestamp)
+        if not file_name is None:
+            msg += ",filename={}".format(file_name)
+        if not boxes is None:
+            msg += ",boxes={}".format(boxes)
+        if not scores is None:
+            msg += ",scores={}".format(scores)
+        msg += " "
+        msg += "numShrimps={}".format(num_shrimps)
+        msg += " "
+        msg += self.get_influx_timestamp(ts=frame_timestamp)
         print(msg)
         res = self.sendMessage(msg)
-        print(res)
 
-    def get_influx_timestamp(self, ts_str):
+    def get_influx_timestamp(self, ts):
         """
         Converts a timestamp with format YEAR-MONTH-DAY_HOUR-MIN-SEC-MILLISEC to a millisecond format (Difference between timestamp and basic timestamp 1677-09-21T00:12:43.145224194Z).
         """
         
-        print(ts_str)
-        [ts_date, ts_time] = ts_str.split("_")
-        ts_date = ts_date.split("-")
-        ts_time = ts_time.split("-")
+        if ts.__class__.__name__ == 'str':
+            [ts_date, ts_time] = ts.split("_")
+            ts_date = ts_date.split("-")
+            ts_time = ts_time.split("-")
 
-        ts = datetime.datetime(int(ts_date[0]), int(ts_date[1]),int(ts_date[2]), int(ts_time[0]),int(ts_time[1]),int(ts_time[2]),int(ts_time[3])*1000)
+            ts = datetime.datetime(int(ts_date[0]), int(ts_date[1]),int(ts_date[2]), int(ts_time[0]),int(ts_time[1]),int(ts_time[2]),int(ts_time[3])*1000)
 
         # 1677-09-21T00:12:43.145224194Z
         base_ts = datetime.datetime(1677, 9, 21, 0, 12, 43, 145224)

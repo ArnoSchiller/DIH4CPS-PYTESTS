@@ -13,6 +13,7 @@ setup(
         "mqtt_connection", 
         "ring_buffer",
         "trained_model", 
+        "video_processing",
         "webcam_capture",
     ],
     package_dir={'': 'src'},

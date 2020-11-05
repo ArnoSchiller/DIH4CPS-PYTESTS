@@ -50,13 +50,9 @@ class Model:
     num_classes = 1
     min_score_thresh = 0.5
 
-    fps = 20
-    delta_ms = 1 / fps * 1000
-    print(delta_ms)
-
     image_dir = "images_detected"
 
-    def __init__(self,  save_detected_frames=False, 
+    def __init__(self,  save_detected_frames=True, 
                         model_name=None, 
                         with_visualisation=global_with_video_display):
 
@@ -87,8 +83,8 @@ class Model:
         ## load the (frozen) Tensorflow model into memory
         self.detection_graph = tf.Graph()
         with self.detection_graph.as_default():
-            od_graph_def = tf.GraphDef()
-            with tf.gfile.GFile(self.model_ckpt_path, 'rb') as fid:
+            od_graph_def = tf.compat.v1.GraphDef()
+            with tf.io.gfile.GFile(self.model_ckpt_path, 'rb') as fid:
                 serialized_graph = fid.read()
                 od_graph_def.ParseFromString(serialized_graph)
                 tf.import_graph_def(od_graph_def, name='')
@@ -110,7 +106,7 @@ class Model:
         res_scores = []
 
         with self.detection_graph.as_default():
-            with tf.Session(graph=self.detection_graph) as sess:
+            with tf.compat.v1.Session(graph=self.detection_graph) as sess:
                 # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
                 image_np_expanded = np.expand_dims(image_np, axis=0)
                 image_tensor = self.detection_graph.get_tensor_by_name('image_tensor:0')
@@ -125,8 +121,8 @@ class Model:
                 (boxes, scores, classes, num_detections) = sess.run(
                     [boxes, scores, classes, num_detections],
                     feed_dict={image_tensor: image_np_expanded})
-                # Visualization of the results of a detection.
                 
+                # Visualization of the results of a detection.
                 """ not needed for edge processing
                 if self.with_visualisation:
                     vis_util.visualize_boxes_and_labels_on_image_array(

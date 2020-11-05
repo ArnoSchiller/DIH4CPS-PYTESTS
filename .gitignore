@@ -11,3 +11,12 @@ v3/dist/
 v3/src/__pycache__/
 v3/src/dih4cps.egg-info/
 v3/test/__pycache__/
+models/test_image.png
+
+models/test1_cronjob_2020-10-03_08-55-29_7.png
+
+v3/src/created_model_graph/
+
+v3/src/utils/
+
+v3/src/model_label_map.pbtxt

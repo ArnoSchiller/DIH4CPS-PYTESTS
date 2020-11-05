@@ -11,7 +11,7 @@ Requirements:
 @authors:   Arno Schiller (AS)
 @email:     schiller@swms.de
 @version:   v2.0.0
-@license:   https://github.com/ArnoSchiller/DIH4CPS-PYTESTS
+@license:   see https://github.com/ArnoSchiller/DIH4CPS-PYTESTS
 
 VERSION HISTORY                                                               \n
 Version:    (Author) Description:                                   Date:     \n

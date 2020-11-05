@@ -34,9 +34,11 @@ global_camera_connection    = "http://root:root@192.168.178.78/mjpg/1/video.mjpg
 # Cloud 
 global_cloud_access_key         = "minio"
 global_cloud_secret_key         = "miniostorage"
-global_cloud_bucket_name        = "test-dih4cps"
 global_cloud_url                = "https://minio.dih4cps.swms-cloud.com:9000/"
 
+global_cloud_bucket_name        = "test-dih4cps"
+global_trained_model_bucket     = "trained-models-dih4cps"
+global_created_model_bucket     = "created-models-dih4cps"
 # MQTT
 global_mqtt_usinglocalhost      = False
 global_mqtt_host                = "demo2.iotstack.co"

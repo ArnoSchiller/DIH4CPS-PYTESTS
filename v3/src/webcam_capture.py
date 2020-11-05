@@ -108,6 +108,8 @@ class WebcamCapture:
                 ret, frame = self.capture.read()
                 if ret == True:
                     self.add_frame_to_buffer(frame)
+                    self.mqtt_client.sendProcessMessage(self.device_name, 
+                self.mqtt_client.status_list["WebcamCapture"]["CapturedFrame"])
             else:
                 self.reconnect()
         self.release()

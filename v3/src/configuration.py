@@ -16,7 +16,7 @@ v0.0.3      (AS) Restructured configs, movednot needed statements   04.11.2020\n
 
 import os
 
-global_user_name                = "test1"
+global_user_name                = "test2"
 
 # if the nunki board is used, the connection will be added in the init_videoCapture function (see webcam_capture) 
 

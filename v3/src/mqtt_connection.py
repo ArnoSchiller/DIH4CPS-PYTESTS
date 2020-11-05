@@ -78,6 +78,8 @@ class MQTTConnection:
             "OpeningCameraFailed"   : "modul=WebcamCapture,process=OpenCamera status=4",
 
             "OpenCameraError"       : "modul=WebcamCapture,process=OpenCamera status=10",
+
+            "CapturedFrame"         : "modul=WebcamCapture,process=CaptureFrame status=2",
         },
 
         "VideoRecorder" : {
@@ -170,15 +172,14 @@ class MQTTConnection:
         if not options.get("file")  == None:
             msg += "file={},".format(options.get("file")) 
         msg += "{}".format(message)
-        print(msg)
         res = self.sendMessage(msg)
 
     def sendDetectionMessage(self,  user, 
                                     process_version, 
                                     model_name,
                                     score_min_thresh,
-                                    frame_timestamp,
                                     num_shrimps,
+                                    frame_timestamp=None,
                                     boxes=None,
                                     scores=None,
                                     process_timestamp=None,
@@ -190,7 +191,7 @@ class MQTTConnection:
         shrimp,user={u},modul=VideoProcessing,process=ProcessPreviousVideos, version={v},modelName={m}, scoreMinThresh={s}[, processTimestamp={p},filename={f},boxes={b},scores{c}] numShrimps={n} timestamp
         """
         msg = "shrimp,user={}".format(user)
-        msg += ",modul=VideoProcessing,process=ProcessPreviousVideos"
+        msg += ",modul=VideoProcessing,process=ProcessVideoStream"#ProcessPreviousVideos"
         msg += ",version={}".format(process_version)
         msg += ",modelName={}".format(model_name)
         msg += ",scoreMinThresh={}".format(score_min_thresh)
@@ -204,8 +205,9 @@ class MQTTConnection:
             msg += ",scores={}".format(scores)
         msg += " "
         msg += "numShrimps={}".format(num_shrimps)
-        msg += " "
-        msg += self.get_influx_timestamp(ts=frame_timestamp)
+        if not frame_timestamp is None:
+            msg += " "
+            msg += self.get_influx_timestamp(ts=frame_timestamp)
         print(msg)
         res = self.sendMessage(msg)
 

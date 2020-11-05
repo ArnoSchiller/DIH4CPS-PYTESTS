@@ -89,7 +89,7 @@ class VideoProcessor:
                                 process_version="01",
                                 model_name=self.used_model_name,
                                 score_min_thresh=self.model.min_score_thresh,
-                                frame_timestamp=timestamp,
+                                #frame_timestamp=timestamp,
                                 boxes=boxes_str,
                                 scores=scores_str,
                                 num_shrimps=num_shrimps)

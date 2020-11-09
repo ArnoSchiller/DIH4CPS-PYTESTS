@@ -36,14 +36,14 @@ class CloudFilesConverter:
                         aws_access_key_id = self.cloud_access_key,
                         aws_secret_access_key = self.cloud_secret_key,
                         endpoint_url=self.cloud_url, 
-                        verify=False,
+                        verify=True,
                         config=boto3.session.Config(signature_version='s3v4'))
                         
         self.s3_resource = boto3.resource('s3',
                         aws_access_key_id = self.cloud_access_key,
                         aws_secret_access_key = self.cloud_secret_key,
                         endpoint_url=self.cloud_url, 
-                        verify=False,
+                        verify=True,
                         config=boto3.session.Config(signature_version='s3v4'))
 
         self.data_v1_bucket_name = self.dataset_handler.bucket_names[0]
@@ -55,14 +55,22 @@ class CloudFilesConverter:
     def change_every_xml(self):
         files_list = self.get_data_to_convert()
         
-        for file_name in files_list:
+        for file_path in files_list:
+
+            xml_file_path = file_path + ".xml"
+            png_file_path = file_path + ".png"
             
-            xml_file_path = "labels/" + file_name + ".xml"
-            png_file_path = "images/" + file_name + ".png"
-            
+            # if the file is listed in data/no_detection no modification is needed, copy both files and continue
+            if file_path.count("no_detection") > 0:
+                self.s3_resource.Object(self.data_v1_bucket_name, png_file_path).copy_from(CopySource=self.data_v2_bucket_name + "/" + png_file_path)
+                self.s3_resource.Object(self.data_v1_bucket_name, xml_file_path).copy_from(CopySource=self.data_v2_bucket_name + "/" + xml_file_path)
+                continue
+
+            file_name = file_path.split("/")[-1]
+
             local_file_path = os.path.join(self.download_dir, file_name + ".xml")
 
-            new_xml_file_path = "labels/" + file_name + FILE_NAME_ADDITION + ".xml"
+            new_xml_file_path = file_path + FILE_NAME_ADDITION + ".xml"
 
             # download xml file 
             self.s3_client.download_file(self.data_v2_bucket_name, xml_file_path, local_file_path)
@@ -84,16 +92,17 @@ class CloudFilesConverter:
             
 
     def get_data_to_convert(self):
-        dataset_v2_files = self.dataset_handler.get_complete_dataset_list(self.data_v2_bucket_name)
+        dataset_v2_files = self.dataset_handler.get_complete_dataset_list(self.data_v2_bucket_name, full_path=True)
         dataset_v1_files = self.dataset_handler.get_complete_dataset_list(self.data_v1_bucket_name)
 
         print("v2: ", len(dataset_v2_files))
         print("v1: ", len(dataset_v1_files))
 
         files_to_convert = []
-        for filename in dataset_v2_files:
+        for filepath in dataset_v2_files:
+            filename = filepath.split("/")[-1]
             if not dataset_v1_files.count(filename + FILE_NAME_ADDITION) > 0:
-                files_to_convert.append(filename)
+                files_to_convert.append(filepath)
 
         print("converts: ", len(files_to_convert))
 
@@ -121,11 +130,10 @@ class Converter:
             print("Allready changed file ", path)
             return
 
-        if os.path.exists(path):
-            file_path = path
-        else:
+        if not os.path.exists(path):
             return 
 
+        file_path = path
         new_file_path = file_path.split(".")[0] + FILE_NAME_ADDITION + ".xml"
 
         parser = etree.XMLParser()
@@ -135,10 +143,6 @@ class Converter:
         for object_iter in xmltree.findall('object'):
             name = object_iter.find('name')
             name.text = 'shrimp'
-            """
-            label = object_iter.find('name').text
-            print(label)
-            #"""
 
         ## save the file 
         self.save(xmltree, new_file_path)

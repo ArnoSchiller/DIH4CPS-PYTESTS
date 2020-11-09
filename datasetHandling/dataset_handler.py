@@ -1,4 +1,5 @@
 import os
+import sys
 import glob
 import boto3 
 
@@ -8,6 +9,9 @@ CLOUD_URL       = "https://minio.dih4cps.swms-cloud.com:9000/"
 
 
 class DatasetHandler:
+
+    data_transformation_path = os.path.join(os.path.dirname(__file__), "data_transformation")
+    sys.path.append(data_transformation_path)
 
     download_dir = os.path.join(os.path.dirname(__file__), "downloads")
 
@@ -57,7 +61,7 @@ class DatasetHandler:
                 self.s3_client.upload_file(image_path, bucket_name, "images/{}.png".format(name))
 
 
-    def create_dataset_version(self, bucket_name, version_id):
+    def create_dataset_version(self, bucket_name, version_id, full_path=True):
 
         version_name = "version_{}".format(version_id)
         ## define dataset version, write every used image into txt
@@ -73,7 +77,23 @@ class DatasetHandler:
 
         if not os.path.exists(temp_dir):
             os.mkdir(temp_dir)
-        
+
+        if full_path:
+            """
+            for data_path in data_list:
+                data_name = data_path.split("/")[-1]
+                
+                xml_path = data_path + ".xml"
+                download_path = os.path.join(labels_dir, "{}.xml".format(data_name))
+                self.s3_client.download_file(bucket_name, xml_path, download_path)
+
+                png_path = data_path + ".png"
+                download_path = os.path.join(images_dir, "{}.png".format(data_name))
+                self.s3_client.download_file(bucket_name, png_path, download_path)
+            #"""
+
+        else:
+            ## old version not needed anymore
             ## download every xml file and every png file
             for data_name in data_list:
                 object_name = "labels/{}.xml".format(data_name)
@@ -99,7 +119,7 @@ class DatasetHandler:
                 command = "python generate_tfrecord.py"
                 args = ""
                 args += " --csv_input={}.csv".format(tag)
-                args += " --image_dir= {}".format(images_dir)
+                args += " --image_dir={}".format(images_dir)
                 args += " --output_path={}.record".format(tag)
                 print(command + args)
                 os.system(command + args)
@@ -119,14 +139,16 @@ class DatasetHandler:
                 os.remove(local_path)
 
         ## remove downloaded files 
+        """
         if os.path.exists(temp_dir):
             files = glob.glob(os.path.join(temp_dir, "*"))
             for file_path in files:
                 os.remove(file_path)
             os.rmdir(temp_dir)
+        #"""
 
 
-    def define_dataset_version(self, bucket_name, version_name):
+    def define_dataset_version(self, bucket_name, version_name, full_path=True):
         ## define dataset version, write every used image into txt
 
         if not self.bucket_names.count(bucket_name) > 0:
@@ -140,8 +162,8 @@ class DatasetHandler:
                 print("Version ", version_name, " allready exists.")
                 return
         
-        all_images = self.get_all_image_names(bucket_name)
-        print("Selected {} images to create version".format(len(all_images)))
+        all_images = self.get_all_image_names(bucket_name, full_path=True)
+        print("Selected {} images to define version".format(len(all_images)))
 
         with open(images_file_name, "w") as out_file:
             for image_name in all_images:
@@ -152,7 +174,7 @@ class DatasetHandler:
 
         os.remove(images_file_name)
     
-    def get_complete_dataset_list(self, bucket_name):
+    def get_complete_dataset_list(self, bucket_name, full_path=False):
 
         if not self.bucket_names.count(bucket_name) > 0:
             return False
@@ -166,16 +188,20 @@ class DatasetHandler:
             object_name = str(bucket_object.key)
             if object_name.count("xml") > 0:
                 filepath = object_name.split(".")[0]
-                filename = filepath.split("/")[1]
+                filename = filepath.split("/")[-1]
                 xml_file_names.append(filename)
                 
         for bucket_object in bucket.objects.all():
             object_name = str(bucket_object.key)
             if object_name.count("png") > 0:
                 filepath = object_name.split(".")[0]
-                filename = filepath.split("/")[1]
+                filename = filepath.split("/")[-1]
                 if xml_file_names.count(filename) > 0:
-                    dataset_files.append(filename)
+                    if full_path:
+                        dataset_files.append(filepath)
+                    else:
+                        dataset_files.append(filename)
+
         return dataset_files
 
     def download_video(self, object_name, download_path, bucket_name=None):
@@ -242,7 +268,7 @@ class DatasetHandler:
     def get_latest_dataset_version(self, bucket_name):
         return "version_2020-10-27"
 
-    def get_all_video_names(self, filter_str=""):
+    def get_all_video_names(self, filter_str="", full_path=False):
         video_file_names = []
         bucket = self.s3_resource.Bucket(self.video_bucket_name)
         for bucket_object in bucket.objects.all():
@@ -251,11 +277,14 @@ class DatasetHandler:
                 if object_name.count("/") > 0:
                     object_name = object_name.split("/")[-1]
                 filename = object_name.split(".")[0]
-                
-                video_file_names.append(filename)
+
+                if full_path:
+                    video_file_names.append(object_name.split(".")[0])
+                else:
+                    video_file_names.append(filename)
         return video_file_names
 
-    def get_all_image_names(self, bucket_name):
+    def get_all_image_names(self, bucket_name, full_path=False):
 
         if not self.bucket_names.count(bucket_name) > 0:
             return False
@@ -268,7 +297,11 @@ class DatasetHandler:
             if object_name.count("png") > 0:
                 filepath = object_name.split(".")[0]
                 filename = filepath.split("/")[1]
-                png_file_names.append(filename)
+                
+                if full_path:
+                    png_file_names.append(object_name.split(".")[0])
+                else:
+                    png_file_names.append(filename)
         return png_file_names
 
     def get_all_label_names(self, bucket_name):
@@ -293,4 +326,4 @@ if __name__ == "__main__":
     #dsh.download_not_labeled_images()
     #dsh.download_missing_image_label()
     #dsh.upload_missing_images(bucket_name=dsh.bucket_names[0], image_dir_path = dsh.download_dir)# image_dir_path= os.path.abspath("C:/Users/Schiller/Downloads/images_detected"))
-    dsh.create_dataset_version(dsh.bucket_names[0], "2020-10-30")
+    dsh.create_dataset_version(dsh.bucket_names[0], "2020-11-09")

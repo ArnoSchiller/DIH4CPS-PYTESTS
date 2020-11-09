@@ -20,3 +20,7 @@ v3/src/created_model_graph/
 v3/src/utils/
 
 v3/src/model_label_map.pbtxt
+
+datasetHandling/__pycache__/
+
+datasetHandling/TEMP_DOWNLOADS/
